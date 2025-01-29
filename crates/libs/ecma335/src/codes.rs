@@ -1,4 +1,3 @@
-
 macro_rules! code {
     ($name:ident($size:literal) $(($table:ident, $code:literal))+) => {
         #[derive(Clone, Copy)]
@@ -26,4 +25,11 @@ impl Default for TypeDefOrRef {
         // TODO: why is this "none"?
         TypeDefOrRef::TypeDef(u32::MAX)
     }
+}
+
+code! { ResolutionScope(2)
+    (Module, 0)
+    (ModuleRef, 1)
+    (AssemblyRef, 2)
+    (TypeRef, 3)
 }

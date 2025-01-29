@@ -38,7 +38,6 @@ macro_rules! flags {
     };
 }
 
-
 flags!(AssemblyFlags, u32);
 impl AssemblyFlags {
     pub const WindowsRuntime: Self = Self(0x200);

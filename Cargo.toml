@@ -8,6 +8,7 @@ members = [
     "crates/targets/*",
     "crates/tests/bindgen",
     "crates/tests/misc/*",
+    "crates/tests/libs/*",
     "crates/tests/winrt/*",
     "crates/tools/*",
 ]
@@ -33,4 +34,5 @@ windows-sys = { path = "crates/libs/sys" }
 windows-targets = { path = "crates/libs/targets" }
 windows-link = { path = "crates/libs/link" }
 windows-version = { path = "crates/libs/version" }
+windows-ecma335 = { path = "crates/libs/ecma335" }
 helpers = { path = "crates/libs/helpers" }
