@@ -73,10 +73,7 @@ impl IntoStream for Tables {
             0, // self.TypeSpec.len(),
         ]);
 
-        let valid_tables: u64 = 1 << 0 | // Module 
-        1 << 0x02 | // TypeDef
-        1 << 0x20 | // Assembly
-        1 << 0x23; // AssemblyRef
+        let valid_tables: u64 = (1 << 0) | (1 << 0x02) | (1 << 0x20) | (1 << 0x23);
 
         // The table stream header...
 
