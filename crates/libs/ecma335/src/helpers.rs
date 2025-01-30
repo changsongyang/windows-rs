@@ -105,10 +105,10 @@ impl Write for Vec<u8> {
         if value < 0x80 {
             self.push(value as u8);
         } else if value < 0x4000 {
-            self.push((0x80 | (value & 0x3F00) >> 8) as u8);
+            self.push((0x80 | ((value & 0x3F00) >> 8)) as u8);
             self.push((value & 0xFF) as u8);
         } else {
-            self.push((0xC0 | (value & 0x1F000000) >> 24) as u8);
+            self.push((0xC0 | ((value & 0x1F000000) >> 24)) as u8);
             self.push(((value & 0xFF0000) >> 16) as u8);
             self.push(((value & 0xFF00) >> 8) as u8);
             self.push((value & 0xFF) as u8);
