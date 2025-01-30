@@ -40,7 +40,7 @@ impl File {
             MajorVersion: 4,
             PublicKeyOrToken: file
                 .blobs
-                .insert(&[0xB7, 0x7A, 0x5C, 0x56, 0x19, 0x34, 0xE0, 0x89]), // TODO: comment on this
+                .insert(&[0xB7, 0x7A, 0x5C, 0x56, 0x19, 0x34, 0xE0, 0x89]),
             ..Default::default()
         });
 
