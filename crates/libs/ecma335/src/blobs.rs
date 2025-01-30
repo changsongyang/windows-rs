@@ -26,12 +26,12 @@ impl Blobs {
             return 0;
         }
 
-        if let Some(offset) = self.map.get(value) {
-            return *offset;
+        if let Some(pos) = self.map.get(value) {
+            return *pos;
         }
 
-        let offset = self.stream.len().try_into().unwrap();
-        self.map.insert(value.to_vec(), offset);
+        let pos = self.stream.len().try_into().unwrap();
+        self.map.insert(value.to_vec(), pos);
         let len = value.len();
 
         match len {
@@ -49,6 +49,6 @@ impl Blobs {
         }
 
         self.stream.extend_from_slice(value);
-        offset
+        pos
     }
 }

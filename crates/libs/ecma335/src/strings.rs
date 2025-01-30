@@ -26,14 +26,14 @@ impl Strings {
             return 0;
         }
 
-        if let Some(offset) = self.map.get(value) {
-            return *offset;
+        if let Some(pos) = self.map.get(value) {
+            return *pos;
         }
 
-        let offset = self.stream.len().try_into().unwrap();
-        self.map.insert(value.to_string(), offset);
+        let pos = self.stream.len().try_into().unwrap();
+        self.map.insert(value.to_string(), pos);
         self.stream.extend_from_slice(value.as_bytes());
         self.stream.push(0);
-        offset
+        pos
     }
 }

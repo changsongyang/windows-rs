@@ -18,6 +18,7 @@ mod file;
 mod helpers;
 mod strings;
 mod tables;
+mod ty;
 
 pub use attributes::*;
 pub use bindings::*;
@@ -27,3 +28,4 @@ pub use file::*;
 pub use helpers::*;
 pub use strings::*;
 pub use tables::*;
+pub use ty::*;

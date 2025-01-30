@@ -6,6 +6,10 @@ pub struct Tables {
     pub AssemblyRef: Vec<AssemblyRef>,
     pub Module: Vec<Module>,
     pub TypeDef: Vec<TypeDef>,
+    pub TypeRef: Vec<TypeRef>,
+    pub Field: Vec<Field>,
+    pub MethodDef: Vec<MethodDef>,
+    pub Param: Vec<Param>,
 }
 
 #[derive(Default)]
@@ -27,11 +31,28 @@ pub struct AssemblyRef {
     pub MinorVersion: u16,
     pub BuildNumber: u16,
     pub RevisionNumber: u16,
-    pub Flags: u32,
+    pub Flags: AssemblyFlags,
     pub PublicKeyOrToken: u32,
     pub Name: u32,
     pub Culture: u32,
     pub HashValue: u32,
+}
+
+#[derive(Default)]
+pub struct Field {
+    pub Flags: u16,
+    pub Name: u32,
+    pub Signature: u32,
+}
+
+#[derive(Default)]
+pub struct MethodDef {
+    pub RVA: u32,
+    pub ImplFlags: u16,
+    pub Flags: u16,
+    pub Name: u32,
+    pub Signature: u32,
+    pub ParamList: u32,
 }
 
 #[derive(Default)]
@@ -44,13 +65,26 @@ pub struct Module {
 }
 
 #[derive(Default)]
+pub struct Param {
+    pub Flags: u16,
+    pub Sequence: u16,
+    pub Name: u32,
+}
+
+#[derive(Default)]
 pub struct TypeDef {
-    pub Flags: u32,
+    pub Flags: TypeAttributes,
     pub TypeName: u32,
     pub TypeNamespace: u32,
     pub Extends: TypeDefOrRef,
     pub FieldList: u32,
     pub MethodList: u32,
+}
+
+pub struct TypeRef {
+    pub ResolutionScope: ResolutionScope,
+    pub TypeName: u32,
+    pub TypeNamespace: u32,
 }
 
 impl IntoStream for Tables {
@@ -60,6 +94,10 @@ impl IntoStream for Tables {
             self.AssemblyRef.len(),
             self.Module.len(),
             self.TypeDef.len(),
+            self.Param.len(),
+            self.Field.len(),
+            self.MethodDef.len(),
+            self.TypeRef.len(),
         ]
         .iter()
         .any(|len| *len > u32::MAX as usize)
@@ -69,11 +107,25 @@ impl IntoStream for Tables {
 
         let type_def_or_ref = coded_index_size(&[
             self.TypeDef.len(),
-            0, // self.TypeRef.len(),
+            self.TypeRef.len(),
             0, // self.TypeSpec.len(),
         ]);
 
-        let valid_tables: u64 = (1 << 0) | (1 << 0x02) | (1 << 0x20) | (1 << 0x23);
+        let resolution_scope = coded_index_size(&[
+            self.Module.len(),
+            //self.ModuleRef.len(),
+            self.AssemblyRef.len(),
+            self.TypeRef.len(),
+        ]);
+
+        let valid_tables: u64 = (1 << 0) | // Module
+        (1 << 0x01) | // TypeRef
+        (1 << 0x02) | // TypeDef
+        (1 << 0x04) | // Field
+        (1 << 0x06) | // MethodDef
+        (1 << 0x08) | // Param
+        (1 << 0x20) | // Assembly
+        (1 << 0x23); // AssemblyRef
 
         // The table stream header...
 
@@ -89,7 +141,11 @@ impl IntoStream for Tables {
         // Followed by the length of each of the valid tables...
 
         buffer.write_u32(self.Module.len() as u32);
+        buffer.write_u32(self.TypeRef.len() as u32);
         buffer.write_u32(self.TypeDef.len() as u32);
+        buffer.write_u32(self.Field.len() as u32);
+        buffer.write_u32(self.MethodDef.len() as u32);
+        buffer.write_u32(self.Param.len() as u32);
         buffer.write_u32(self.Assembly.len() as u32);
         buffer.write_u32(self.AssemblyRef.len() as u32);
 
@@ -103,13 +159,40 @@ impl IntoStream for Tables {
             buffer.write_u32(x.EncBaseId);
         }
 
+        for x in self.TypeRef {
+            buffer.write_code(x.ResolutionScope.encode(), resolution_scope);
+            buffer.write_u32(x.TypeName);
+            buffer.write_u32(x.TypeNamespace);
+        }
+
         for x in &self.TypeDef {
-            buffer.write_u32(x.Flags);
+            buffer.write_u32(x.Flags.0);
             buffer.write_u32(x.TypeName);
             buffer.write_u32(x.TypeNamespace);
             buffer.write_code(x.Extends.encode(), type_def_or_ref);
             buffer.write_index(x.FieldList, 0); // self.Field.len());
             buffer.write_index(x.MethodList, 0); // self.MethodDef.len());
+        }
+
+        for x in self.Field {
+            buffer.write_u16(x.Flags);
+            buffer.write_u32(x.Name);
+            buffer.write_u32(x.Signature);
+        }
+
+        for x in self.MethodDef {
+            buffer.write_u32(x.RVA);
+            buffer.write_u16(x.ImplFlags);
+            buffer.write_u16(x.Flags);
+            buffer.write_u32(x.Name);
+            buffer.write_u32(x.Signature);
+            buffer.write_index(x.ParamList, self.Param.len());
+        }
+
+        for x in self.Param {
+            buffer.write_u16(x.Flags);
+            buffer.write_u16(x.Sequence);
+            buffer.write_u32(x.Name);
         }
 
         for x in self.Assembly {
@@ -129,7 +212,7 @@ impl IntoStream for Tables {
             buffer.write_u16(x.MinorVersion);
             buffer.write_u16(x.BuildNumber);
             buffer.write_u16(x.RevisionNumber);
-            buffer.write_u32(x.Flags);
+            buffer.write_u32(x.Flags.0);
             buffer.write_u32(x.PublicKeyOrToken);
             buffer.write_u32(x.Name);
             buffer.write_u32(x.Culture);
