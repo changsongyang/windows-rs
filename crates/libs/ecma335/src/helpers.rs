@@ -53,6 +53,7 @@ pub trait Write {
     fn write_u64(&mut self, value: u64);
     fn write_code(&mut self, value: u32, size: usize);
     fn write_index(&mut self, index: u32, len: usize);
+    fn write_compressed(&mut self, value: usize);
 }
 
 impl Write for Vec<u8> {
@@ -94,6 +95,23 @@ impl Write for Vec<u8> {
             self.write_u16(index as u16 + 1);
         } else {
             self.write_u32(index + 1);
+        }
+    }
+
+    fn write_compressed(&mut self, value: usize) {
+        // See II.23.2 in ECMA-335
+        assert!(value < 0x20000000);
+
+        if value < 0x80 {
+            self.push(value as u8);
+        } else if value < 0x4000 {
+            self.push((0x80 | (value & 0x3F00) >> 8) as u8);
+            self.push((value & 0xFF) as u8);
+        } else {
+            self.push((0xC0 | (value & 0x1F000000) >> 24) as u8);
+            self.push(((value & 0xFF0000) >> 16) as u8);
+            self.push(((value & 0xFF00) >> 8) as u8);
+            self.push((value & 0xFF) as u8);
         }
     }
 }

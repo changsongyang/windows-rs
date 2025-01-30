@@ -1,6 +1,7 @@
 use super::*;
 mod into_stream;
 
+/// Represents an ECMA-335 file in memory so that it can be built incrementally.
 #[derive(Default)]
 pub struct File {
     strings: Strings,
@@ -12,6 +13,7 @@ pub struct File {
 }
 
 impl File {
+    /// Creates a minimal ECMA-335 file representation.
     pub fn new(name: &str) -> Self {
         let mut file = Self::default();
 
@@ -111,5 +113,61 @@ impl File {
             .insert(name.to_string(), pos);
 
         pos
+    }
+
+    pub fn Field(&mut self, name: &str, flags: FieldAttributes, ty: &Type) -> u32 {
+        let signature = self.FieldSig(ty);
+
+        self.tables.Field.push_pos(Field {
+            Name: self.strings.insert(name),
+            Flags: flags,
+            Signature: signature,
+        })
+    }
+
+    pub fn Type(&mut self, ty: &Type, buffer: &mut Vec<u8>) {
+        match ty {
+            Type::Void => buffer.push(ELEMENT_TYPE_VOID),
+            Type::Bool => buffer.push(ELEMENT_TYPE_BOOLEAN),
+            Type::Char => buffer.push(ELEMENT_TYPE_CHAR),
+            Type::I8 => buffer.push(ELEMENT_TYPE_I1),
+            Type::U8 => buffer.push(ELEMENT_TYPE_U1),
+            Type::I16 => buffer.push(ELEMENT_TYPE_I2),
+            Type::U16 => buffer.push(ELEMENT_TYPE_U2),
+            Type::I32 => buffer.push(ELEMENT_TYPE_I4),
+            Type::U32 => buffer.push(ELEMENT_TYPE_U4),
+            Type::I64 => buffer.push(ELEMENT_TYPE_I8),
+            Type::U64 => buffer.push(ELEMENT_TYPE_U8),
+            Type::F32 => buffer.push(ELEMENT_TYPE_R4),
+            Type::F64 => buffer.push(ELEMENT_TYPE_R8),
+            Type::ISize => buffer.push(ELEMENT_TYPE_I),
+            Type::USize => buffer.push(ELEMENT_TYPE_U),
+            Type::String => buffer.push(ELEMENT_TYPE_STRING),
+            Type::Object => buffer.push(ELEMENT_TYPE_OBJECT),
+
+            Type::Name(ty) => {
+                if !ty.generics.is_empty() {
+                    buffer.push(ELEMENT_TYPE_GENERICINST);
+                }
+
+                let pos = self.TypeRef(&ty.name, &ty.namespace);
+                buffer.push(ELEMENT_TYPE_VALUETYPE);
+                buffer.write_compressed(TypeDefOrRef::TypeRef(pos).encode() as usize);
+
+                if !ty.generics.is_empty() {
+                    buffer.write_compressed(ty.generics.len());
+
+                    for ty in &ty.generics {
+                        self.Type(ty, buffer);
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn FieldSig(&mut self, ty: &Type) -> u32 {
+        let mut buffer = vec![0x6]; // FIELD
+        self.Type(ty, &mut buffer);
+        self.blobs.insert(&buffer)
     }
 }

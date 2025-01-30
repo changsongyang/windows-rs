@@ -40,7 +40,7 @@ pub struct AssemblyRef {
 
 #[derive(Default)]
 pub struct Field {
-    pub Flags: u16,
+    pub Flags: FieldAttributes,
     pub Name: u32,
     pub Signature: u32,
 }
@@ -175,7 +175,7 @@ impl IntoStream for Tables {
         }
 
         for x in self.Field {
-            buffer.write_u16(x.Flags);
+            buffer.write_u16(x.Flags.0);
             buffer.write_u32(x.Name);
             buffer.write_u32(x.Signature);
         }
