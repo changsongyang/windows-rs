@@ -4,12 +4,46 @@ use super::*;
 pub struct Tables {
     pub Assembly: Vec<Assembly>,
     pub AssemblyRef: Vec<AssemblyRef>,
+    pub Attribute: Vec<Attribute>,
+    pub ClassLayout: Vec<ClassLayout>,
+    pub Constant: Vec<Constant>,
+    pub Field: Vec<Field>,
+    pub GenericParam: Vec<GenericParam>,
+    pub ImplMap: Vec<ImplMap>,
+    pub InterfaceImpl: Vec<InterfaceImpl>,
+    pub MemberRef: Vec<MemberRef>,
+    pub MethodDef: Vec<MethodDef>,
     pub Module: Vec<Module>,
+    pub ModuleRef: Vec<ModuleRef>,
+    pub NestedClass: Vec<NestedClass>,
+    pub Param: Vec<Param>,
+    pub Property: Vec<Property>,
     pub TypeDef: Vec<TypeDef>,
     pub TypeRef: Vec<TypeRef>,
-    pub Field: Vec<Field>,
-    pub MethodDef: Vec<MethodDef>,
-    pub Param: Vec<Param>,
+    pub TypeSpec: Vec<TypeSpec>,
+}
+
+#[derive(Default)]
+pub struct TypeSpec {
+    pub Signature: u32,
+}
+
+#[derive(Default)]
+pub struct Property {
+    pub Flags: u16,
+    pub Name: u32,
+    pub Type: u32,
+}
+
+#[derive(Default)]
+pub struct NestedClass {
+    pub NestedClass: u32,
+    pub EnclosingClass: u32,
+}
+
+#[derive(Default)]
+pub struct ModuleRef {
+    pub Name: u32,
 }
 
 #[derive(Default)]
@@ -25,6 +59,19 @@ pub struct Assembly {
     pub Culture: u32,
 }
 
+pub struct InterfaceImpl {
+    pub Class: u32,
+    pub Interface: TypeDefOrRef,
+}
+
+#[derive(Default)]
+pub struct ImplMap {
+    pub MappingFlags: u16,
+    pub MemberForwarded: u32,
+    pub ImportName: u32,
+    pub ImportScope: u32,
+}
+
 #[derive(Default)]
 pub struct AssemblyRef {
     pub MajorVersion: u16,
@@ -37,6 +84,20 @@ pub struct AssemblyRef {
     pub Culture: u32,
     pub HashValue: u32,
 }
+
+#[derive(Default)]
+pub struct ClassLayout {
+    pub PackingSize: u16,
+    pub ClassSize: u32,
+    pub Parent: u32,
+}
+
+pub struct Constant {
+    pub Type: u16,
+    pub Parent: HasConstant,
+    pub Value: u32,
+}
+
 
 #[derive(Default)]
 pub struct Field {
@@ -64,6 +125,13 @@ pub struct Module {
     pub EncBaseId: u32,
 }
 
+pub struct GenericParam {
+    pub Number: u16,
+    pub Flags: u16,
+    pub Owner: TypeOrMethodDef,
+    pub Name: u32,
+}
+
 #[derive(Default)]
 pub struct Param {
     pub Flags: ParamAttributes,
@@ -87,17 +155,40 @@ pub struct TypeRef {
     pub TypeNamespace: u32,
 }
 
+pub struct Attribute {
+    pub Parent: HasAttribute,
+    pub Type: AttributeType,
+    pub Value: u32,
+}
+
+pub struct MemberRef {
+    pub Class: MemberRefParent,
+    pub Name: u32,
+    pub Signature: u32,
+}
+
 impl Tables {
     pub fn into_stream(self) -> Vec<u8> {
         if [
             self.Assembly.len(),
             self.AssemblyRef.len(),
-            self.Module.len(),
-            self.TypeDef.len(),
-            self.Param.len(),
+            self.Attribute.len(),
+            self.ClassLayout.len(),
+            self.Constant.len(),
             self.Field.len(),
+            self.GenericParam.len(),
+            self.ImplMap.len(),
+            self.InterfaceImpl.len(),
+            self.MemberRef.len(),
             self.MethodDef.len(),
+            self.Module.len(),
+            self.ModuleRef.len(),
+            self.NestedClass.len(),
+            self.Param.len(),
+            self.Property.len(),
+            self.TypeDef.len(),
             self.TypeRef.len(),
+            self.TypeSpec.len(),
         ]
         .iter()
         .any(|len| *len > u32::MAX as usize)
@@ -105,27 +196,74 @@ impl Tables {
             panic!("metadata table too large");
         }
 
-        let type_def_or_ref = coded_index_size(&[
-            self.TypeDef.len(),
-            self.TypeRef.len(),
-            0, // self.TypeSpec.len(),
-        ]);
-
         let resolution_scope = coded_index_size(&[
             self.Module.len(),
-            //self.ModuleRef.len(),
+            self.ModuleRef.len(),
             self.AssemblyRef.len(),
             self.TypeRef.len(),
         ]);
+        let type_def_or_ref = coded_index_size(&[
+            self.TypeDef.len(),
+            self.TypeRef.len(),
+            self.TypeSpec.len(),
+        ]);
+        let has_constant =
+            coded_index_size(&[self.Field.len(), self.Param.len(), self.Property.len()]);
+        let type_or_method_def =
+            coded_index_size(&[self.TypeDef.len(), self.MethodDef.len()]);
+        let member_ref_parent = coded_index_size(&[
+            self.TypeDef.len(),
+            self.TypeRef.len(),
+            self.ModuleRef.len(),
+            self.MethodDef.len(),
+            self.TypeSpec.len(),
+        ]);
+        let custom_attribute_type =
+            coded_index_size(&[self.MethodDef.len(), self.MemberRef.len(), 0, 0, 0]);
+        let has_custom_attribute = coded_index_size(&[
+            self.MethodDef.len(),
+            self.Field.len(),
+            self.TypeRef.len(),
+            self.TypeDef.len(),
+            self.Param.len(),
+            self.InterfaceImpl.len(),
+            self.MemberRef.len(),
+            self.Module.len(),
+            0,
+            0,
+            0,
+            self.ModuleRef.len(),
+            self.TypeSpec.len(),
+            0,
+            self.AssemblyRef.len(),
+            0,
+            0,
+            0,
+            self.GenericParam.len(),
+            0,
+            0,
+        ]);
 
-        let valid_tables: u64 = (1 << 0) | // Module
+        let valid_tables: u64 = 
+        (1 << 0) | // Module 
         (1 << 0x01) | // TypeRef
         (1 << 0x02) | // TypeDef
         (1 << 0x04) | // Field
         (1 << 0x06) | // MethodDef
         (1 << 0x08) | // Param
+        (1 << 0x09) | // InterfaceImpl
+        (1 << 0x0A) | // MemberRef
+        (1 << 0x0B) | // Constant
+        (1 << 0x0C) | // CustomAttribute
+        (1 << 0x0F) | // ClassLayout
+        (1 << 0x17) | // Property
+        (1 << 0x1A) | // ModuleRef
+        (1 << 0x1B) | // TypeSpec
+        (1 << 0x1C) | // ImplMap
         (1 << 0x20) | // Assembly
-        (1 << 0x23); // AssemblyRef
+        (1 << 0x23) | // AssemblyRef
+        (1 << 0x29) | // NestedClass
+        (1 << 0x2A); // GenericParam
 
         // The table stream header...
 
@@ -146,8 +284,19 @@ impl Tables {
         buffer.write_u32(self.Field.len() as u32);
         buffer.write_u32(self.MethodDef.len() as u32);
         buffer.write_u32(self.Param.len() as u32);
+        buffer.write_u32(self.InterfaceImpl.len() as u32);
+        buffer.write_u32(self.MemberRef.len() as u32);
+        buffer.write_u32(self.Constant.len() as u32);
+        buffer.write_u32(self.Attribute.len() as u32);
+        buffer.write_u32(self.ClassLayout.len() as u32);
+        buffer.write_u32(self.Property.len() as u32);
+        buffer.write_u32(self.ModuleRef.len() as u32);
+        buffer.write_u32(self.TypeSpec.len() as u32);
+        buffer.write_u32(self.ImplMap.len() as u32);
         buffer.write_u32(self.Assembly.len() as u32);
         buffer.write_u32(self.AssemblyRef.len() as u32);
+        buffer.write_u32(self.NestedClass.len() as u32);
+        buffer.write_u32(self.GenericParam.len() as u32);
 
         // Followed by each table's rows...
 
@@ -170,8 +319,8 @@ impl Tables {
             buffer.write_u32(x.TypeName);
             buffer.write_u32(x.TypeNamespace);
             buffer.write_code(x.Extends.encode(), type_def_or_ref);
-            buffer.write_index(x.FieldList, 0); // self.Field.len());
-            buffer.write_index(x.MethodList, 0); // self.MethodDef.len());
+            buffer.write_index(x.FieldList, self.Field.len());
+            buffer.write_index(x.MethodList, self.MethodDef.len());
         }
 
         for x in self.Field {
@@ -193,6 +342,33 @@ impl Tables {
             buffer.write_u16(x.Flags.0);
             buffer.write_u16(x.Sequence);
             buffer.write_u32(x.Name);
+        }
+
+        for x in self.InterfaceImpl {
+            buffer.write_index(x.Class, self.TypeDef.len());
+            buffer.write_code(x.Interface.encode(), type_def_or_ref);
+        }
+        
+        for x in self.MemberRef {
+            buffer.write_code(x.Class.encode(), member_ref_parent);
+            buffer.write_u32(x.Name);
+            buffer.write_u32(x.Signature);
+        }
+
+        for x in self.Constant {
+            buffer.write_u16(x.Type);
+            buffer.write_code(x.Parent.encode(), has_constant);
+            buffer.write_u32(x.Value);
+        }
+
+        for x in self.Attribute {
+            buffer.write_code(x.Parent.encode(), has_custom_attribute);
+            buffer.write_code(x.Type.encode(), custom_attribute_type);
+            buffer.write_u32(x.Value);
+        }
+
+        for x in self.TypeSpec {
+            buffer.write_u32(x.Signature);
         }
 
         for x in self.Assembly {
@@ -217,6 +393,13 @@ impl Tables {
             buffer.write_u32(x.Name);
             buffer.write_u32(x.Culture);
             buffer.write_u32(x.HashValue);
+        }
+
+        for x in self.GenericParam {
+            buffer.write_u16(x.Number);
+            buffer.write_u16(x.Flags);
+            buffer.write_code(x.Owner.encode(), type_or_method_def);
+            buffer.write_u32(x.Name);
         }
 
         buffer.into_stream()

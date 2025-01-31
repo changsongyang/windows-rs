@@ -39,6 +39,8 @@ impl<const LEN: usize> STREAM_HEADER<LEN> {
 
 impl File {
     pub fn into_stream(self) -> Vec<u8> {
+        // TODO: write sorted tables.
+
         let mut strings = self.strings.into_stream();
         let mut blobs = self.blobs.into_stream();
         let mut tables = self.tables.into_stream();

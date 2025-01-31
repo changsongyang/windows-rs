@@ -33,3 +33,31 @@ code! { ResolutionScope(2)
     (AssemblyRef, 2)
     (TypeRef, 3)
 }
+
+code! { HasAttribute(5)
+    (MethodDef, 0)
+    (Field, 1)
+    (TypeRef, 2)
+    (TypeDef, 3)
+    (Param, 4)
+    (InterfaceImpl, 5)
+    (MemberRef, 6)
+    (TypeSpec, 13)
+    (GenericParam, 19)
+}
+
+code! { AttributeType(3)
+    (MemberRef, 3)
+}
+
+code! { MemberRefParent(3)
+    (TypeRef, 1)
+}
+
+code! { HasConstant(2)
+    (Field, 0)
+}
+
+code! { TypeOrMethodDef(1)
+    (TypeDef, 0)
+}

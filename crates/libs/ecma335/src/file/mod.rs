@@ -8,8 +8,12 @@ pub struct File {
     blobs: Blobs,
     tables: Tables,
 
+    // Indexes for fast lookup of preexisting rows.
     TypeRef: HashMap<String, HashMap<String, u32>>,
     AssemblyRef: HashMap<String, u32>,
+
+    // Staging for sorted rows before these tables can be written.
+    Attribute: HashMap<HasAttribute, Vec<(AttributeType, u32)>>,
 }
 
 impl File {
@@ -189,6 +193,7 @@ impl File {
 
                 let pos = self.TypeRef(ty.name, ty.namespace);
                 // Technically this should be ELEMENT_TYPE_CLASS if the type is not a value type but that requires more contextual information.
+                // TODO: we could replace Type::Name with Type::Value and Type::Class to provide this context if needed.
                 buffer.push(ELEMENT_TYPE_VALUETYPE);
                 buffer.write_compressed(TypeDefOrRef::TypeRef(pos).encode() as usize);
 
