@@ -66,7 +66,7 @@ pub struct Module {
 
 #[derive(Default)]
 pub struct Param {
-    pub Flags: u16,
+    pub Flags: ParamAttributes,
     pub Sequence: u16,
     pub Name: u32,
 }
@@ -190,7 +190,7 @@ impl Tables {
         }
 
         for x in self.Param {
-            buffer.write_u16(x.Flags);
+            buffer.write_u16(x.Flags.0);
             buffer.write_u16(x.Sequence);
             buffer.write_u32(x.Name);
         }

@@ -145,6 +145,15 @@ impl File {
         })
     }
 
+    /// Adds a `Param` row to the file, returning the row offset.
+    pub fn Param(&mut self, name: &str, sequence: u16, flags: ParamAttributes) -> u32 {
+        self.tables.Param.push_pos(Param {
+            Flags: flags,
+            Sequence: sequence,
+            Name: self.strings.insert(name),
+        })
+    }
+
     /// Encodes the `Type` in the buffer. Any required `TypeRef` rows will be added to the file, returning the blob offset.
     fn Type(&mut self, ty: &Type, buffer: &mut Vec<u8>) {
         match ty {
