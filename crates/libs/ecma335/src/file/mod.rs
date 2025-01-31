@@ -45,6 +45,7 @@ impl File {
         file
     }
 
+    /// Adds an `AssemblyRef` row representing the given namespace to the file.
     fn AssemblyRef(&mut self, namespace: &str) -> u32 {
         if let Some(pos) = self.AssemblyRef.get(namespace) {
             return *pos;
@@ -75,6 +76,7 @@ impl File {
         pos
     }
 
+    /// Adds a `TypeDef` row to the file.
     pub fn TypeDef(
         &mut self,
         name: &str,
@@ -92,6 +94,7 @@ impl File {
         })
     }
 
+    /// Adds a `TypeRef` row to the file.
     pub fn TypeRef(&mut self, name: &str, namespace: &str) -> u32 {
         if let Some(key) = self.TypeRef.get(namespace) {
             if let Some(pos) = key.get(name) {
@@ -115,6 +118,7 @@ impl File {
         pos
     }
 
+    /// Adds a `Field` row to the file.
     pub fn Field(&mut self, name: &str, flags: FieldAttributes, ty: &Type) -> u32 {
         let signature = self.FieldSig(ty);
 
@@ -125,6 +129,7 @@ impl File {
         })
     }
 
+    /// Encodes the `Type` in the buffer. Any required `TypeRef` rows will be added to the file.
     fn Type(&mut self, ty: &Type, buffer: &mut Vec<u8>) {
         match ty {
             Type::Void => buffer.push(ELEMENT_TYPE_VOID),
@@ -165,6 +170,7 @@ impl File {
         }
     }
 
+    /// Writes the `Type` into a `FileSig` buffer and stores it in the file.
     fn FieldSig(&mut self, ty: &Type) -> u32 {
         let mut buffer = vec![0x6]; // FIELD
         self.Type(ty, &mut buffer);
