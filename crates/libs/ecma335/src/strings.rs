@@ -14,12 +14,6 @@ impl Default for Strings {
     }
 }
 
-impl IntoStream for Strings {
-    fn into_stream(self) -> Vec<u8> {
-        self.stream.into_stream()
-    }
-}
-
 impl Strings {
     pub fn insert(&mut self, value: &str) -> u32 {
         if value.is_empty() {
@@ -35,5 +29,9 @@ impl Strings {
         self.stream.extend_from_slice(value.as_bytes());
         self.stream.push(0);
         pos
+    }
+
+    pub fn into_stream(self) -> Vec<u8> {
+        self.stream.into_stream()
     }
 }

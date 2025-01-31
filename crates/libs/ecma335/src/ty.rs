@@ -1,20 +1,20 @@
-pub struct TypeName {
-    pub namespace: String,
-    pub name: String,
-    pub generics: Vec<Type>,
+pub struct TypeName<'a> {
+    pub namespace: &'a str,
+    pub name: &'a str,
+    pub generics: Vec<Type<'a>>,
 }
 
-impl TypeName {
-    pub fn new(name: &str, namespace: &str) -> Self {
+impl<'a> TypeName<'a> {
+    pub fn new(name: &'a str, namespace: &'a str) -> Self {
         Self {
-            name: name.to_string(),
-            namespace: namespace.to_string(),
+            name,
+            namespace,
             generics: vec![],
         }
     }
 }
 
-pub enum Type {
+pub enum Type<'a> {
     Void,
     Bool,
     Char,
@@ -32,11 +32,11 @@ pub enum Type {
     USize,
     String,
     Object,
-    Name(TypeName),
+    Name(TypeName<'a>),
 }
 
-impl Type {
-    pub fn new(name: &str, namespace: &str) -> Self {
+impl<'a> Type<'a> {
+    pub fn new(name: &'a str, namespace: &'a str) -> Self {
         Self::Name(TypeName::new(name, namespace))
     }
 }

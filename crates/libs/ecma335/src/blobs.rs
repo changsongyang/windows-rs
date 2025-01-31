@@ -14,12 +14,6 @@ impl Default for Blobs {
     }
 }
 
-impl IntoStream for Blobs {
-    fn into_stream(self) -> Vec<u8> {
-        self.stream.into_stream()
-    }
-}
-
 impl Blobs {
     pub fn insert(&mut self, value: &[u8]) -> u32 {
         if value.is_empty() {
@@ -50,5 +44,9 @@ impl Blobs {
 
         self.stream.extend_from_slice(value);
         pos
+    }
+
+    pub fn into_stream(self) -> Vec<u8> {
+        self.stream.into_stream()
     }
 }

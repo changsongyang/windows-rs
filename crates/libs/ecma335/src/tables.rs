@@ -87,8 +87,8 @@ pub struct TypeRef {
     pub TypeNamespace: u32,
 }
 
-impl IntoStream for Tables {
-    fn into_stream(self) -> Vec<u8> {
+impl Tables {
+    pub fn into_stream(self) -> Vec<u8> {
         if [
             self.Assembly.len(),
             self.AssemblyRef.len(),
@@ -220,5 +220,34 @@ impl IntoStream for Tables {
         }
 
         buffer.into_stream()
+    }
+}
+
+// A coded index (see codes.rs) is a table index that may refer to different tables. The size of the column in memory
+// must therefore be large enough to hold an index for a row in the largest possible table. This function determines
+// this size for the given winmd file.
+fn coded_index_size(tables: &[usize]) -> usize {
+    fn small(row_count: usize, bits: u8) -> bool {
+        (row_count as u64) < (1u64 << (16 - bits))
+    }
+
+    fn bits_needed(value: usize) -> u8 {
+        let mut value = value - 1;
+        let mut bits: u8 = 1;
+        while {
+            value >>= 1;
+            value != 0
+        } {
+            bits += 1;
+        }
+        bits
+    }
+
+    let bits_needed = bits_needed(tables.len());
+
+    if tables.iter().all(|table| small(*table, bits_needed)) {
+        2
+    } else {
+        4
     }
 }

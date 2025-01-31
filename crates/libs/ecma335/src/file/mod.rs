@@ -45,7 +45,7 @@ impl File {
         file
     }
 
-    pub fn AssemblyRef(&mut self, namespace: &str) -> u32 {
+    fn AssemblyRef(&mut self, namespace: &str) -> u32 {
         if let Some(pos) = self.AssemblyRef.get(namespace) {
             return *pos;
         }
@@ -125,7 +125,7 @@ impl File {
         })
     }
 
-    pub fn Type(&mut self, ty: &Type, buffer: &mut Vec<u8>) {
+    fn Type(&mut self, ty: &Type, buffer: &mut Vec<u8>) {
         match ty {
             Type::Void => buffer.push(ELEMENT_TYPE_VOID),
             Type::Bool => buffer.push(ELEMENT_TYPE_BOOLEAN),
@@ -150,7 +150,7 @@ impl File {
                     buffer.push(ELEMENT_TYPE_GENERICINST);
                 }
 
-                let pos = self.TypeRef(&ty.name, &ty.namespace);
+                let pos = self.TypeRef(ty.name, ty.namespace);
                 buffer.push(ELEMENT_TYPE_VALUETYPE);
                 buffer.write_compressed(TypeDefOrRef::TypeRef(pos).encode() as usize);
 
@@ -165,7 +165,7 @@ impl File {
         }
     }
 
-    pub fn FieldSig(&mut self, ty: &Type) -> u32 {
+    fn FieldSig(&mut self, ty: &Type) -> u32 {
         let mut buffer = vec![0x6]; // FIELD
         self.Type(ty, &mut buffer);
         self.blobs.insert(&buffer)
