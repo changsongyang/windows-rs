@@ -48,8 +48,8 @@ pub struct Field {
 #[derive(Default)]
 pub struct MethodDef {
     pub RVA: u32,
-    pub ImplFlags: u16,
-    pub Flags: u16,
+    pub ImplFlags: MethodImplAttributes,
+    pub Flags: MethodAttributes,
     pub Name: u32,
     pub Signature: u32,
     pub ParamList: u32,
@@ -182,8 +182,8 @@ impl Tables {
 
         for x in self.MethodDef {
             buffer.write_u32(x.RVA);
-            buffer.write_u16(x.ImplFlags);
-            buffer.write_u16(x.Flags);
+            buffer.write_u16(x.ImplFlags.0);
+            buffer.write_u16(x.Flags.0);
             buffer.write_u32(x.Name);
             buffer.write_u32(x.Signature);
             buffer.write_index(x.ParamList, self.Param.len());

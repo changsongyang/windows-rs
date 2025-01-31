@@ -15,13 +15,11 @@ fn test() {
             | TypeAttributes::WindowsRuntime,
     );
 
-    file.Field(
-        "SomeGuid",
-        &Type::new("Guid", "System"),
-        FieldAttributes::Public,
-    );
+    let signature = file.FieldSig(&Type::new("Guid", "System"));
+    file.Field("SomeGuid", signature, FieldAttributes::Public);
 
-    file.Field("SomeNum", &Type::I32, FieldAttributes::Public);
+    let signature = file.FieldSig(&Type::I32);
+    file.Field("SomeNum", signature, FieldAttributes::Public);
 
     let bytes = file.into_stream();
     std::fs::write("tests/struct.winmd", bytes).unwrap();

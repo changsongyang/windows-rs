@@ -45,7 +45,7 @@ impl File {
         file
     }
 
-    /// Adds an `AssemblyRef` row representing the given namespace to the file.
+    /// Adds an `AssemblyRef` row representing the given namespace to the file, returning the row offset.
     fn AssemblyRef(&mut self, namespace: &str) -> u32 {
         if let Some(pos) = self.AssemblyRef.get(namespace) {
             return *pos;
@@ -76,7 +76,7 @@ impl File {
         pos
     }
 
-    /// Adds a `TypeDef` row to the file.
+    /// Adds a `TypeDef` row to the file, returning the row offset.
     pub fn TypeDef(
         &mut self,
         name: &str,
@@ -94,7 +94,7 @@ impl File {
         })
     }
 
-    /// Adds a `TypeRef` row to the file.
+    /// Adds a `TypeRef` row to the file, returning the row offset.
     pub fn TypeRef(&mut self, name: &str, namespace: &str) -> u32 {
         if let Some(key) = self.TypeRef.get(namespace) {
             if let Some(pos) = key.get(name) {
@@ -118,10 +118,8 @@ impl File {
         pos
     }
 
-    /// Adds a `Field` row to the file.
-    pub fn Field(&mut self, name: &str, ty: &Type, flags: FieldAttributes) -> u32 {
-        let signature = self.FieldSig(ty);
-
+    /// Adds a `Field` row to the file, returning the row offset.
+    pub fn Field(&mut self, name: &str, signature: u32, flags: FieldAttributes) -> u32 {
         self.tables.Field.push_pos(Field {
             Name: self.strings.insert(name),
             Flags: flags,
@@ -129,7 +127,25 @@ impl File {
         })
     }
 
-    /// Encodes the `Type` in the buffer. Any required `TypeRef` rows will be added to the file.
+    /// Adds a `MethodDef` row to the file, returning the row offset.
+    pub fn MethodDef(
+        &mut self,
+        name: &str,
+        signature: u32,
+        flags: MethodAttributes,
+        impl_flags: MethodImplAttributes,
+    ) -> u32 {
+        self.tables.MethodDef.push_pos(MethodDef {
+            RVA: 0,
+            ImplFlags: impl_flags,
+            Flags: flags,
+            Name: self.strings.insert(name),
+            Signature: signature,
+            ParamList: self.tables.Param.len() as u32,
+        })
+    }
+
+    /// Encodes the `Type` in the buffer. Any required `TypeRef` rows will be added to the file, returning the blob offset.
     fn Type(&mut self, ty: &Type, buffer: &mut Vec<u8>) {
         match ty {
             Type::Void => buffer.push(ELEMENT_TYPE_VOID),
@@ -170,10 +186,28 @@ impl File {
         }
     }
 
-    /// Writes the `Type` into a `FileSig` buffer and stores it in the file.
-    fn FieldSig(&mut self, ty: &Type) -> u32 {
+    /// Writes the `Type` into a `FileSig` buffer and stores it in the file, returning the blob offset.
+    pub fn FieldSig(&mut self, ty: &Type) -> u32 {
         let mut buffer = vec![0x6]; // FIELD
         self.Type(ty, &mut buffer);
+        self.blobs.insert(&buffer)
+    }
+
+    /// Writes the method signature into a `MethodDefSig` buffer and stores it in the file, returning the blob offset.
+    pub fn MethodDefSig(
+        &mut self,
+        params: &[Type],
+        return_type: &Type,
+        flags: MethodCallAttributes,
+    ) -> u32 {
+        let mut buffer = vec![flags.0];
+        buffer.write_compressed(params.len());
+        self.Type(return_type, &mut buffer);
+
+        for ty in params {
+            self.Type(ty, &mut buffer);
+        }
+
         self.blobs.insert(&buffer)
     }
 }
