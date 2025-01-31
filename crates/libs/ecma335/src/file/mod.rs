@@ -40,7 +40,7 @@ impl File {
         file.AssemblyRef("System");
 
         // The parent type of "globals" expected by most parsers.
-        file.TypeDef("<Module>", "", TypeAttributes(0), TypeDefOrRef::default());
+        file.TypeDef("<Module>", "", TypeDefOrRef::default(), TypeAttributes(0));
 
         file
     }
@@ -81,8 +81,8 @@ impl File {
         &mut self,
         name: &str,
         namespace: &str,
-        flags: TypeAttributes,
         extends: TypeDefOrRef,
+        flags: TypeAttributes,
     ) -> u32 {
         self.tables.TypeDef.push_pos(TypeDef {
             TypeName: self.strings.insert(name),
@@ -119,7 +119,7 @@ impl File {
     }
 
     /// Adds a `Field` row to the file.
-    pub fn Field(&mut self, name: &str, flags: FieldAttributes, ty: &Type) -> u32 {
+    pub fn Field(&mut self, name: &str, ty: &Type, flags: FieldAttributes) -> u32 {
         let signature = self.FieldSig(ty);
 
         self.tables.Field.push_pos(Field {

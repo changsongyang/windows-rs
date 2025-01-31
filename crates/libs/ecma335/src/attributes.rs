@@ -45,7 +45,13 @@ impl AssemblyFlags {
 
 flags!(FieldAttributes, u16);
 impl FieldAttributes {
+    pub const Private: Self = Self(0x1);
+    pub const Public: Self = Self(0x6);
     pub const Literal: Self = Self(0x40);
+    pub const Static: Self = Self(0x10);
+    pub const SpecialName: Self = Self(0x200);
+    pub const RTSpecialName: Self = Self(0x400);
+    pub const HasDefault: Self = Self(0x8000);
 }
 
 flags!(MethodAttributes, u16);
@@ -75,6 +81,12 @@ impl PInvokeAttributes {
 
 flags!(TypeAttributes, u32);
 impl TypeAttributes {
+    pub const Public: Self = Self(0x1);
     pub const ExplicitLayout: Self = Self(0x10);
+    pub const Abstract: Self = Self(0x80);
+    pub const Sealed: Self = Self(0x100);
     pub const WindowsRuntime: Self = Self(0x4000);
+    pub const Interface: Self = Self(0x20);
+    pub const SequentialLayout: Self = Self(0x8);
+    pub const Import: Self = Self(0x1000);
 }
