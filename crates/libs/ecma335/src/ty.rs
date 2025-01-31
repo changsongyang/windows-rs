@@ -1,5 +1,3 @@
-use super::*;
-
 pub struct TypeName {
     pub namespace: String,
     pub name: String,

@@ -37,8 +37,8 @@ impl<const LEN: usize> STREAM_HEADER<LEN> {
     }
 }
 
-impl IntoStream for File {
-    fn into_stream(self) -> Vec<u8> {
+impl File {
+    pub fn into_stream(self) -> Vec<u8> {
         let mut strings = self.strings.into_stream();
         let mut blobs = self.blobs.into_stream();
         let mut tables = self.tables.into_stream();
