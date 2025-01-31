@@ -47,6 +47,12 @@ impl File {
 
     /// Adds an `AssemblyRef` row representing the given namespace to the file, returning the row offset.
     fn AssemblyRef(&mut self, namespace: &str) -> u32 {
+        // This generates a synthetic `AssemblyRef` for every root namespace, but the alternative requires a
+        // lot more contextual information which we can hopefully avoid for now.
+        let namespace = namespace
+            .split_once('.')
+            .map_or(namespace, |(prefix, _)| prefix);
+
         if let Some(pos) = self.AssemblyRef.get(namespace) {
             return *pos;
         }
@@ -102,6 +108,7 @@ impl File {
             }
         }
 
+        // The type may be local to the module but that requires more contextual information.
         let scope = ResolutionScope::AssemblyRef(self.AssemblyRef(namespace));
 
         let pos = self.tables.TypeRef.push_pos(TypeRef {
@@ -181,6 +188,7 @@ impl File {
                 }
 
                 let pos = self.TypeRef(ty.name, ty.namespace);
+                // Technically this should be ELEMENT_TYPE_CLASS if the type is not a value type but that requires more contextual information.
                 buffer.push(ELEMENT_TYPE_VALUETYPE);
                 buffer.write_compressed(TypeDefOrRef::TypeRef(pos).encode() as usize);
 
