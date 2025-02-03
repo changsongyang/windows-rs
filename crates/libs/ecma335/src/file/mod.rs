@@ -12,8 +12,9 @@ pub struct File {
     TypeRef: HashMap<String, HashMap<String, u32>>,
     AssemblyRef: HashMap<String, u32>,
 
-    // Staging for sorted rows before these tables can be written.
-    Attribute: HashMap<HasAttribute, Vec<(AttributeType, u32)>>,
+    // Staging for sorted rows before these tables can be written. BTreeMap is used rather than HashMap to allow reproducible builds.
+    Attribute: BTreeMap<HasAttribute, Vec<(AttributeType, u32)>>,
+    // TODO: may need to place TypeDef here as well due to secondary requirement to sort nested types
 }
 
 impl File {
@@ -156,6 +157,14 @@ impl File {
         })
     }
 
+    pub fn MemberRef(&mut self, name: &str, signature: u32, parent: MemberRefParent) -> u32 {
+        self.tables.MemberRef.push_pos(MemberRef {
+            Name: self.strings.insert(name),
+            Signature: signature,
+            Parent: parent,
+        })
+    }
+
     /// Adds a `Param` row to the file, returning the row offset.
     pub fn Param(&mut self, name: &str, sequence: u16, flags: ParamAttributes) -> u32 {
         self.tables.Param.push_pos(Param {
@@ -163,6 +172,11 @@ impl File {
             Sequence: sequence,
             Name: self.strings.insert(name),
         })
+    }
+
+    /// Adds an `Attribute` row to the file. This is a sorted table so the row offset is not yet available.
+    pub fn Attribute(&mut self, parent: HasAttribute, ty: AttributeType, value: u32) {
+        self.Attribute.entry(parent).or_default().push((ty, value));
     }
 
     /// Encodes the `Type` in the buffer. Any required `TypeRef` rows will be added to the file, returning the blob offset.
@@ -232,4 +246,8 @@ impl File {
 
         self.blobs.insert(&buffer)
     }
+
+    // pub fn AttributeValue(&mut self, values: &[(&str, Value)]) -> u32 {
+
+    // }
 }

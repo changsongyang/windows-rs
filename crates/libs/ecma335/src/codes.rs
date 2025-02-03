@@ -1,6 +1,6 @@
 macro_rules! code {
     ($name:ident($size:literal) $(($table:ident, $code:literal))+) => {
-        #[derive(Clone, Copy)]
+        #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd)]
         pub enum $name {
             $($table(u32),)*
         }

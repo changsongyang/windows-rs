@@ -23,25 +23,21 @@ pub struct Tables {
     pub TypeSpec: Vec<TypeSpec>,
 }
 
-#[derive(Default)]
 pub struct TypeSpec {
     pub Signature: u32,
 }
 
-#[derive(Default)]
 pub struct Property {
     pub Flags: u16,
     pub Name: u32,
     pub Type: u32,
 }
 
-#[derive(Default)]
 pub struct NestedClass {
     pub NestedClass: u32,
     pub EnclosingClass: u32,
 }
 
-#[derive(Default)]
 pub struct ModuleRef {
     pub Name: u32,
 }
@@ -64,7 +60,6 @@ pub struct InterfaceImpl {
     pub Interface: TypeDefOrRef,
 }
 
-#[derive(Default)]
 pub struct ImplMap {
     pub MappingFlags: u16,
     pub MemberForwarded: u32,
@@ -85,7 +80,6 @@ pub struct AssemblyRef {
     pub HashValue: u32,
 }
 
-#[derive(Default)]
 pub struct ClassLayout {
     pub PackingSize: u16,
     pub ClassSize: u32,
@@ -98,15 +92,12 @@ pub struct Constant {
     pub Value: u32,
 }
 
-
-#[derive(Default)]
 pub struct Field {
     pub Flags: FieldAttributes,
     pub Name: u32,
     pub Signature: u32,
 }
 
-#[derive(Default)]
 pub struct MethodDef {
     pub RVA: u32,
     pub ImplFlags: MethodImplAttributes,
@@ -132,14 +123,12 @@ pub struct GenericParam {
     pub Name: u32,
 }
 
-#[derive(Default)]
 pub struct Param {
     pub Flags: ParamAttributes,
     pub Sequence: u16,
     pub Name: u32,
 }
 
-#[derive(Default)]
 pub struct TypeDef {
     pub Flags: TypeAttributes,
     pub TypeName: u32,
@@ -162,7 +151,7 @@ pub struct Attribute {
 }
 
 pub struct MemberRef {
-    pub Class: MemberRefParent,
+    pub Parent: MemberRefParent,
     pub Name: u32,
     pub Signature: u32,
 }
@@ -202,15 +191,13 @@ impl Tables {
             self.AssemblyRef.len(),
             self.TypeRef.len(),
         ]);
-        let type_def_or_ref = coded_index_size(&[
-            self.TypeDef.len(),
-            self.TypeRef.len(),
-            self.TypeSpec.len(),
-        ]);
+        let type_def_or_ref =
+            coded_index_size(&[self.TypeDef.len(), self.TypeRef.len(), self.TypeSpec.len()]);
         let has_constant =
             coded_index_size(&[self.Field.len(), self.Param.len(), self.Property.len()]);
-        let type_or_method_def =
-            coded_index_size(&[self.TypeDef.len(), self.MethodDef.len()]);
+
+        let type_or_method_def = coded_index_size(&[self.TypeDef.len(), self.MethodDef.len()]);
+
         let member_ref_parent = coded_index_size(&[
             self.TypeDef.len(),
             self.TypeRef.len(),
@@ -244,8 +231,7 @@ impl Tables {
             0,
         ]);
 
-        let valid_tables: u64 = 
-        (1 << 0) | // Module 
+        let valid_tables: u64 = (1 << 0) | // Module 
         (1 << 0x01) | // TypeRef
         (1 << 0x02) | // TypeDef
         (1 << 0x04) | // Field
@@ -348,9 +334,9 @@ impl Tables {
             buffer.write_index(x.Class, self.TypeDef.len());
             buffer.write_code(x.Interface.encode(), type_def_or_ref);
         }
-        
+
         for x in self.MemberRef {
-            buffer.write_code(x.Class.encode(), member_ref_parent);
+            buffer.write_code(x.Parent.encode(), member_ref_parent);
             buffer.write_u32(x.Name);
             buffer.write_u32(x.Signature);
         }

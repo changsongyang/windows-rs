@@ -14,7 +14,7 @@ mod ty;
 use bindings::*;
 use blobs::*;
 use helpers::*;
-use std::collections::hash_map::*;
+use std::collections::*;
 use strings::*;
 use tables::*;
 
