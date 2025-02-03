@@ -10,6 +10,7 @@ mod helpers;
 mod strings;
 mod tables;
 mod ty;
+mod value;
 
 use bindings::*;
 use blobs::*;
@@ -22,3 +23,4 @@ pub use attributes::*;
 pub use codes::*;
 pub use file::*;
 pub use ty::*;
+pub use value::*;

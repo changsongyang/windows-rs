@@ -247,7 +247,23 @@ impl File {
         self.blobs.insert(&buffer)
     }
 
-    // pub fn AttributeValue(&mut self, values: &[(&str, Value)]) -> u32 {
+    pub fn AttributeValue(&mut self, fixed: &[Value], named: &[(&str, Value)]) -> u32 {
+        let mut buffer = vec![];
+        buffer.write_u16(1); // prolog
 
-    // }
+        for value in fixed {
+            buffer.write_value(value);
+        }
+
+        buffer.write_u16(named.len().try_into().unwrap());
+
+        for (name, value) in named {
+            buffer.push(0x53); // field=0x53 property=0x54
+            buffer.write_compressed(name.len());
+            buffer.extend_from_slice(name.as_bytes());
+            buffer.write_value(value);
+        }
+
+        self.blobs.insert(&buffer)
+    }
 }

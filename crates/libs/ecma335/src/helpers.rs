@@ -1,3 +1,5 @@
+use super::*;
+
 pub fn round(size: usize, round: usize) -> usize {
     let round = round - 1;
     (size + round) & !round
@@ -16,13 +18,13 @@ impl IntoStream for Vec<u8> {
 
 pub trait Write {
     fn write_header<T: Sized>(&mut self, value: &T);
-    fn write_u8(&mut self, value: u8);
     fn write_u16(&mut self, value: u16);
     fn write_u32(&mut self, value: u32);
     fn write_u64(&mut self, value: u64);
     fn write_code(&mut self, value: u32, size: usize);
     fn write_index(&mut self, index: u32, len: usize);
     fn write_compressed(&mut self, value: usize);
+    fn write_value(&mut self, value: &Value);
 }
 
 impl Write for Vec<u8> {
@@ -33,10 +35,6 @@ impl Write for Vec<u8> {
                 core::mem::size_of::<T>(),
             ));
         }
-    }
-
-    fn write_u8(&mut self, value: u8) {
-        self.extend_from_slice(&value.to_le_bytes());
     }
 
     fn write_u16(&mut self, value: u16) {
@@ -81,6 +79,28 @@ impl Write for Vec<u8> {
             self.push(((value & 0xFF0000) >> 16) as u8);
             self.push(((value & 0xFF00) >> 8) as u8);
             self.push((value & 0xFF) as u8);
+        }
+    }
+
+    fn write_value(&mut self, value: &Value) {
+        match value {
+            Value::Bool(value) => {
+                if *value {
+                    self.push(1)
+                } else {
+                    self.push(0)
+                }
+            }
+            Value::U8(value) => self.extend_from_slice(&value.to_le_bytes()),
+            Value::I8(value) => self.extend_from_slice(&value.to_le_bytes()),
+            Value::U16(value) => self.extend_from_slice(&value.to_le_bytes()),
+            Value::I16(value) => self.extend_from_slice(&value.to_le_bytes()),
+            Value::U32(value) => self.extend_from_slice(&value.to_le_bytes()),
+            Value::I32(value) => self.extend_from_slice(&value.to_le_bytes()),
+            Value::U64(value) => self.extend_from_slice(&value.to_le_bytes()),
+            Value::I64(value) => self.extend_from_slice(&value.to_le_bytes()),
+            Value::F32(value) => self.extend_from_slice(&value.to_le_bytes()),
+            Value::F64(value) => self.extend_from_slice(&value.to_le_bytes()),
         }
     }
 }

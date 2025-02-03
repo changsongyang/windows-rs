@@ -255,10 +255,10 @@ impl Tables {
 
         let mut buffer = Vec::new();
         buffer.write_u32(0); // Reserved
-        buffer.write_u8(2); // MajorVersion
-        buffer.write_u8(0); // MinorVersion
-        buffer.write_u8(0b111); // HeapSizes
-        buffer.write_u8(0); // Reserved
+        buffer.push(2); // MajorVersion
+        buffer.push(0); // MinorVersion
+        buffer.push(0b111); // HeapSizes
+        buffer.push(0); // Reserved
         buffer.write_u64(valid_tables);
         buffer.write_u64(0); // Sorted
 
