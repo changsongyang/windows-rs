@@ -37,19 +37,19 @@ use signature::*;
 use std::cmp::Ordering;
 use std::collections::*;
 use std::fmt::Write;
-use tables::*;
+pub use tables::*;
 use tokens::*;
 use type_map::*;
 use type_name::*;
 use type_tree::*;
-use types::*;
+pub use types::*;
 use value::*;
-use winmd::*;
+pub use winmd::*;
 use writer::*;
 mod method_names;
 use method_names::*;
 
-struct Config {
+pub struct Config {
     pub types: TypeMap,
     pub references: References,
     pub output: String,
