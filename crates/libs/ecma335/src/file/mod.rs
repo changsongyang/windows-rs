@@ -45,7 +45,7 @@ impl File {
         file.AssemblyRef("System");
 
         // The parent type of "globals" expected by most parsers.
-        file.TypeDef("<Module>", "", TypeDefOrRef::default(), TypeAttributes(0));
+        file.TypeDef("", "<Module>", TypeDefOrRef::default(), TypeAttributes(0));
 
         file
     }
@@ -90,8 +90,8 @@ impl File {
     /// Adds a `TypeDef` row to the file, returning the row offset.
     pub fn TypeDef(
         &mut self,
-        name: &str,
         namespace: &str,
+        name: &str,
         extends: TypeDefOrRef,
         flags: TypeAttributes,
     ) -> u32 {
@@ -106,7 +106,7 @@ impl File {
     }
 
     /// Adds a `TypeRef` row to the file, returning the row offset.
-    pub fn TypeRef(&mut self, name: &str, namespace: &str) -> u32 {
+    pub fn TypeRef(&mut self, namespace: &str, name: &str) -> u32 {
         if let Some(key) = self.TypeRef.get(namespace) {
             if let Some(pos) = key.get(name) {
                 return *pos;
@@ -205,7 +205,7 @@ impl File {
                     buffer.push(ELEMENT_TYPE_GENERICINST);
                 }
 
-                let pos = self.TypeRef(ty.name, ty.namespace);
+                let pos = self.TypeRef(ty.namespace, ty.name);
                 // Technically this should be ELEMENT_TYPE_CLASS if the type is not a value type but that requires more contextual information.
                 // TODO: we could replace Type::Name with Type::Value and Type::Class to provide this context if needed.
                 buffer.push(ELEMENT_TYPE_VALUETYPE);

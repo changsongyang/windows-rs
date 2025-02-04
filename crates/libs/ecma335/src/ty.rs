@@ -5,10 +5,10 @@ pub struct TypeName<'a> {
 }
 
 impl<'a> TypeName<'a> {
-    pub fn new(name: &'a str, namespace: &'a str) -> Self {
+    pub fn new(namespace: &'a str, name: &'a str) -> Self {
         Self {
-            name,
             namespace,
+            name,
             generics: vec![],
         }
     }
@@ -36,7 +36,7 @@ pub enum Type<'a> {
 }
 
 impl<'a> Type<'a> {
-    pub fn new(name: &'a str, namespace: &'a str) -> Self {
-        Self::Name(TypeName::new(name, namespace))
+    pub fn new(namespace: &'a str, name: &'a str) -> Self {
+        Self::Name(TypeName::new(namespace, name))
     }
 }

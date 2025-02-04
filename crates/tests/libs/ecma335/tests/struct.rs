@@ -3,11 +3,11 @@ use windows_ecma335::*;
 #[test]
 fn test() {
     let mut file = File::new("test");
-    let value_type = file.TypeRef("ValueType", "System");
+    let value_type = file.TypeRef("System", "ValueType");
 
     file.TypeDef(
-        "Name",
         "Namespace",
+        "Name",
         TypeDefOrRef::TypeRef(value_type),
         TypeAttributes::Public
             | TypeAttributes::SequentialLayout
@@ -15,7 +15,7 @@ fn test() {
             | TypeAttributes::WindowsRuntime,
     );
 
-    let signature = file.FieldSig(&Type::new("Guid", "System"));
+    let signature = file.FieldSig(&Type::new("System", "Guid"));
     file.Field("SomeGuid", signature, FieldAttributes::Public);
 
     let signature = file.FieldSig(&Type::I32);

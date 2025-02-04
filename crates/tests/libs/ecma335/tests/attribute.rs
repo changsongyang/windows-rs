@@ -5,8 +5,8 @@ fn test() {
     let mut file = File::new("test");
 
     let def = file.TypeDef(
-        "Name",
         "Namespace",
+        "Name",
         TypeDefOrRef::default(),
         TypeAttributes::Public
             | TypeAttributes::Interface
@@ -15,7 +15,7 @@ fn test() {
     );
 
     let attribute =
-        MemberRefParent::TypeRef(file.TypeRef("GuidAttribute", "Windows.Foundation.Metadata"));
+        MemberRefParent::TypeRef(file.TypeRef("Windows.Foundation.Metadata", "GuidAttribute"));
 
     let signature = file.MethodDefSig(
         &[

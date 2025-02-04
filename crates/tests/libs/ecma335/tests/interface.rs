@@ -5,8 +5,8 @@ fn test() {
     let mut file = File::new("test");
 
     file.TypeDef(
-        "Name",
         "Namespace",
+        "Name",
         TypeDefOrRef::default(),
         TypeAttributes::Public
             | TypeAttributes::Interface
