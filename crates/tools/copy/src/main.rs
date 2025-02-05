@@ -21,6 +21,7 @@ fn main() {
 fn write_type(output: &mut w::File, ty: &r::Type) {
     match ty {
         r::Type::Enum(ty) => write_def(output, ty.def),
+        r::Type::Struct(ty) => write_def(output, ty.def),
         _ => {}
     }
 }
@@ -74,6 +75,8 @@ fn convert_type(input: &r::Type) -> w::Type<'static> {
         r::Type::String => w::Type::String,
         r::Type::Object => w::Type::Object,
         r::Type::Enum(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
+        r::Type::Struct(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
+        r::Type::Interface(ty) => w::Type::Name(w::TypeName{ namespace: ty.def.namespace(), name: ty.def.name(), generics: ty.generics.iter().map(|ty|convert_type(ty)).collect() }),
         rest => panic!("{rest:?}"),
     }
 }
