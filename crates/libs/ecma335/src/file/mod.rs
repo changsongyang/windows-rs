@@ -240,6 +240,8 @@ impl File {
                     }
                 }
             }
+
+            Type::Type => self.Type(&Type::new("System", "Type"), buffer),
         }
     }
 

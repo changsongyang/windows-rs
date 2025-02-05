@@ -32,6 +32,54 @@ fn write_type(output: &mut w::File, ty: &r::Type) {
     }
 }
 
+fn write_attributes<R: r::HasAttributes>(output: &mut w::File, parent: w::HasAttribute, row: R) {
+    for attribute in row.attributes() {
+        let r::AttributeType::MemberRef(ctor) = attribute.ty();
+        let r::MemberRefParent::TypeRef(ty) = ctor.parent();
+        let attribute_ref = w::MemberRefParent::TypeRef(output.TypeRef(ty.namespace(), ty.name()));
+        let args = attribute.args();
+
+        let types: Vec<w::Type> = args
+            .iter()
+            .filter_map(|(name, value)| {
+                if name.is_empty() {
+                    Some(convert_value(value).ty())
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        let signature = output.MethodDefSig(&types, &w::Type::Void, w::MethodCallAttributes(0));
+        let ctor = output.MemberRef(".ctor", signature, attribute_ref);
+
+        let fixed: Vec<w::Value> = args
+            .iter()
+            .filter_map(|(name, value)| {
+                if name.is_empty() {
+                    Some(convert_value(value))
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        let named: Vec<(&str, w::Value)> = args
+            .iter()
+            .filter_map(|(name, value)| {
+                if !name.is_empty() {
+                    Some((*name, convert_value(value)))
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        let value = output.AttributeValue(&fixed, &named);
+        output.Attribute(parent, w::AttributeType::MemberRef(ctor), value);
+    }
+}
+
 fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
     println!("{}.{}", def.namespace(), def.name());
 
@@ -43,7 +91,7 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
         w::TypeDefOrRef::default()
     };
 
-    output.TypeDef(def.namespace(), def.name(), extends, flags);
+    let type_def = output.TypeDef(def.namespace(), def.name(), extends, flags);
 
     for field in def.fields() {
         let flags = w::FieldAttributes(field.flags().0);
@@ -53,12 +101,14 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
 
         if let Some(constant) = field.constant() {
             let value = convert_value(&constant.value());
-            let ty = value.ty();
+            let ty = value.ty().code();
             let value = output.ConstantValue(&value);
 
             output.Constant(w::HasConstant::Field(parent), ty, value);
         }
     }
+
+    write_attributes(output, w::HasAttribute::TypeDef(type_def), def);
 
     // Methods on classes is a huge overhead on .winmd size but adds no value as all of this information
     // is redundantly stored elsewhere.
@@ -142,6 +192,8 @@ fn convert_value(value: &r::Value) -> w::Value {
         r::Value::I64(value) => w::Value::I64(*value),
         r::Value::F32(value) => w::Value::F32(*value),
         r::Value::F64(value) => w::Value::F64(*value),
+        r::Value::Str(value) => w::Value::Str(*value),
+        r::Value::TypeName(tn) => w::Value::TypeName(w::TypeName::new(tn.namespace(), tn.name())),
         rest => panic!("{rest:?}"),
     }
 }
