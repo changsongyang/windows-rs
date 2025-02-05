@@ -49,6 +49,14 @@ impl File {
             }
         }
 
+        for (parent, (ty, value)) in self.Constant {
+            self.tables.Constant.push(Constant{
+                Parent: parent,
+                Type: ty,
+                Value: value,
+            });
+        }
+
         let mut strings = self.strings.into_stream();
         let mut blobs = self.blobs.into_stream();
         let mut tables = self.tables.into_stream();

@@ -87,7 +87,7 @@ pub struct ClassLayout {
 }
 
 pub struct Constant {
-    pub Type: u16,
+    pub Type: u8,
     pub Parent: HasConstant,
     pub Value: u32,
 }
@@ -342,7 +342,8 @@ impl Tables {
         }
 
         for x in self.Constant {
-            buffer.write_u16(x.Type);
+            buffer.push(x.Type);
+            buffer.push(0);
             buffer.write_code(x.Parent.encode(), has_constant);
             buffer.write_u32(x.Value);
         }

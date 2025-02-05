@@ -42,7 +42,15 @@ fn write_def(output: &mut w::File, def: r::TypeDef) {
         let flags = w::FieldAttributes(field.flags().0);
         let signature = output.FieldSig(&convert_type(&field.ty(None)));
 
-        output.Field(field.name(), signature, flags);
+        let parent = output.Field(field.name(), signature, flags);
+
+        if let Some(constant) = field.constant() {
+            let value = convert_value(&constant.value());
+            let ty = value.ty();
+            let value = output.ConstantValue(&value);
+
+            output.Constant(w::HasConstant::Field(parent), ty, value);
+        }
     }
 }
 
@@ -66,6 +74,23 @@ fn convert_type(input: &r::Type) -> w::Type<'static> {
         r::Type::String => w::Type::String,
         r::Type::Object => w::Type::Object,
         r::Type::Enum(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
+        rest => panic!("{rest:?}"),
+    }
+}
+
+fn convert_value(value: &r::Value) -> w::Value {
+    match value {
+        r::Value::Bool(value) => w::Value::Bool(*value),
+        r::Value::U8(value) => w::Value::U8(*value),
+        r::Value::I8(value) => w::Value::I8(*value),
+        r::Value::U16(value) => w::Value::U16(*value),
+        r::Value::I16(value) => w::Value::I16(*value),
+        r::Value::U32(value) => w::Value::U32(*value),
+        r::Value::I32(value) => w::Value::I32(*value),
+        r::Value::U64(value) => w::Value::U64(*value),
+        r::Value::I64(value) => w::Value::I64(*value),
+        r::Value::F32(value) => w::Value::F32(*value),
+        r::Value::F64(value) => w::Value::F64(*value),
         rest => panic!("{rest:?}"),
     }
 }

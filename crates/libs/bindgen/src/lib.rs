@@ -43,7 +43,7 @@ use type_map::*;
 use type_name::*;
 use type_tree::*;
 pub use types::*;
-use value::*;
+pub use value::*;
 pub use winmd::*;
 use writer::*;
 mod method_names;

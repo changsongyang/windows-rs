@@ -14,6 +14,7 @@ pub struct File {
 
     // Staging for sorted rows before these tables can be written. BTreeMap is used rather than HashMap to allow reproducible builds.
     Attribute: BTreeMap<HasAttribute, Vec<(AttributeType, u32)>>,
+    Constant: BTreeMap<HasConstant, (u8, u32)>,
     // TODO: may need to place TypeDef here as well due to secondary requirement to sort nested types
 }
 
@@ -179,6 +180,10 @@ impl File {
         self.Attribute.entry(parent).or_default().push((ty, value));
     }
 
+    pub fn Constant(&mut self, parent: HasConstant, ty: u8, value: u32) {
+        self.Constant.insert(parent, (ty, value));
+    }
+
     /// Encodes the `Type` in the buffer. Any required `TypeRef` rows will be added to the file, returning the blob offset.
     fn Type(&mut self, ty: &Type, buffer: &mut Vec<u8>) {
         match ty {
@@ -244,6 +249,12 @@ impl File {
             self.Type(ty, &mut buffer);
         }
 
+        self.blobs.insert(&buffer)
+    }
+
+    pub fn ConstantValue(&mut self, value: &Value) -> u32 {
+        let mut buffer = vec![];
+        buffer.write_value(value);
         self.blobs.insert(&buffer)
     }
 
