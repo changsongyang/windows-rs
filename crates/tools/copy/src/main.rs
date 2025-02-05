@@ -4,11 +4,14 @@ use windows_ecma335 as w;
 fn main() {
     let time = std::time::Instant::now();
 
-    let input = r::Reader::new(vec![r::File::new(std::fs::read("crates/libs/bindgen/default/Windows.winmd").unwrap()).unwrap()]);
+    let input = r::Reader::new(vec![r::File::new(
+        std::fs::read("crates/libs/bindgen/default/Windows.winmd").unwrap(),
+    )
+    .unwrap()]);
 
     let mut output = w::File::new("test");
 
-    for ty in input.values().flat_map(|values|values.values()).flatten() {
+    for ty in input.values().flat_map(|values| values.values()).flatten() {
         write_type(&mut output, ty);
     }
 
@@ -22,6 +25,8 @@ fn write_type(output: &mut w::File, ty: &r::Type) {
     match ty {
         r::Type::Enum(ty) => write_def(output, ty.def),
         r::Type::Struct(ty) => write_def(output, ty.def),
+        r::Type::Delegate(ty) => write_def(output, ty.def),
+        r::Type::Interface(ty) => write_def(output, ty.def),
         _ => {}
     }
 }
@@ -53,6 +58,32 @@ fn write_def(output: &mut w::File, def: r::TypeDef) {
             output.Constant(w::HasConstant::Field(parent), ty, value);
         }
     }
+
+    for method in def.methods() {
+        let signature = method.signature("", &[]);
+        let types: Vec<w::Type> = signature
+            .params
+            .iter()
+            .map(|param| convert_type(&param.ty))
+            .collect();
+        let signature_blob = output.MethodDefSig(
+            &types,
+            &convert_type(&signature.return_type),
+            w::MethodCallAttributes(signature.call_flags.0),
+        );
+        let flags = w::MethodAttributes(method.flags().0);
+        let impl_flags = w::MethodImplAttributes(method.impl_flags().0);
+
+        output.MethodDef(method.name(), signature_blob, flags, impl_flags);
+
+        for param in signature.params {
+            output.Param(
+                param.def.name(),
+                param.def.sequence(),
+                w::ParamAttributes(param.def.flags().0),
+            );
+        }
+    }
 }
 
 fn convert_type(input: &r::Type) -> w::Type<'static> {
@@ -74,9 +105,21 @@ fn convert_type(input: &r::Type) -> w::Type<'static> {
         r::Type::USize => w::Type::USize,
         r::Type::String => w::Type::String,
         r::Type::Object => w::Type::Object,
+        r::Type::GUID => w::Type::new("System", "Guid"),
+        // TODO: Type::HRESULT is ambiguous... since it can refer to either the WinRT or Win32 HRESULT
+        r::Type::HRESULT => w::Type::new("Windows.Foundation", "HResult"),
+        r::Type::Array(ty) => w::Type::Array(Box::new(convert_type(ty))),
+        r::Type::ArrayRef(ty) => w::Type::ArrayRef(Box::new(convert_type(ty))),
+        r::Type::ConstRef(ty) => w::Type::ConstRef(Box::new(convert_type(ty))),
         r::Type::Enum(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
         r::Type::Struct(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
-        r::Type::Interface(ty) => w::Type::Name(w::TypeName{ namespace: ty.def.namespace(), name: ty.def.name(), generics: ty.generics.iter().map(|ty|convert_type(ty)).collect() }),
+        r::Type::Class(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
+        r::Type::Delegate(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
+        r::Type::Interface(ty) => w::Type::Name(w::TypeName {
+            namespace: ty.def.namespace(),
+            name: ty.def.name(),
+            generics: ty.generics.iter().map(|ty| convert_type(ty)).collect(),
+        }),
         rest => panic!("{rest:?}"),
     }
 }

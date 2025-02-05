@@ -50,7 +50,7 @@ impl File {
         }
 
         for (parent, (ty, value)) in self.Constant {
-            self.tables.Constant.push(Constant{
+            self.tables.Constant.push(Constant {
                 Parent: parent,
                 Type: ty,
                 Value: value,

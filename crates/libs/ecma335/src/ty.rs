@@ -33,6 +33,9 @@ pub enum Type<'a> {
     String,
     Object,
     Name(TypeName<'a>),
+    Array(Box<Self>),
+    ArrayRef(Box<Self>),
+    ConstRef(Box<Self>),
 }
 
 impl<'a> Type<'a> {

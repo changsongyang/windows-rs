@@ -205,6 +205,22 @@ impl File {
             Type::String => buffer.push(ELEMENT_TYPE_STRING),
             Type::Object => buffer.push(ELEMENT_TYPE_OBJECT),
 
+            Type::Array(ty) => {
+                buffer.push(ELEMENT_TYPE_SZARRAY);
+                self.Type(ty, buffer);
+            }
+
+            Type::ArrayRef(ty) => {
+                buffer.push(ELEMENT_TYPE_BYREF);
+                buffer.push(ELEMENT_TYPE_SZARRAY);
+                self.Type(ty, buffer);
+            }
+
+            Type::ConstRef(ty) => {
+                // TODO: need to write the "IsConst" modifier
+                self.Type(ty, buffer);
+            }
+
             Type::Name(ty) => {
                 if !ty.generics.is_empty() {
                     buffer.push(ELEMENT_TYPE_GENERICINST);
