@@ -23,15 +23,16 @@ fn main() {
 
 fn write_type(output: &mut w::File, ty: &r::Type) {
     match ty {
-        r::Type::Enum(ty) => write_def(output, ty.def),
-        r::Type::Struct(ty) => write_def(output, ty.def),
-        r::Type::Delegate(ty) => write_def(output, ty.def),
-        r::Type::Interface(ty) => write_def(output, ty.def),
+        r::Type::Enum(ty) => write_def(output, ty.def, true),
+        r::Type::Struct(ty) => write_def(output, ty.def, true),
+        r::Type::Delegate(ty) => write_def(output, ty.def, true),
+        r::Type::Interface(ty) => write_def(output, ty.def, true),
+        r::Type::Class(ty) => write_def(output, ty.def, false),
         _ => {}
     }
 }
 
-fn write_def(output: &mut w::File, def: r::TypeDef) {
+fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
     println!("{}.{}", def.namespace(), def.name());
 
     let flags = w::TypeAttributes(def.flags().0);
@@ -59,29 +60,33 @@ fn write_def(output: &mut w::File, def: r::TypeDef) {
         }
     }
 
-    for method in def.methods() {
-        let signature = method.signature("", &[]);
-        let types: Vec<w::Type> = signature
-            .params
-            .iter()
-            .map(|param| convert_type(&param.ty))
-            .collect();
-        let signature_blob = output.MethodDefSig(
-            &types,
-            &convert_type(&signature.return_type),
-            w::MethodCallAttributes(signature.call_flags.0),
-        );
-        let flags = w::MethodAttributes(method.flags().0);
-        let impl_flags = w::MethodImplAttributes(method.impl_flags().0);
-
-        output.MethodDef(method.name(), signature_blob, flags, impl_flags);
-
-        for param in signature.params {
-            output.Param(
-                param.def.name(),
-                param.def.sequence(),
-                w::ParamAttributes(param.def.flags().0),
+    // Methods on classes is a huge overhead on .winmd size but adds no value as all of this information
+    // is redundantly stored elsewhere.
+    if include_methods {
+        for method in def.methods() {
+            let signature = method.signature("", &[]);
+            let types: Vec<w::Type> = signature
+                .params
+                .iter()
+                .map(|param| convert_type(&param.ty))
+                .collect();
+            let signature_blob = output.MethodDefSig(
+                &types,
+                &convert_type(&signature.return_type),
+                w::MethodCallAttributes(signature.call_flags.0),
             );
+            let flags = w::MethodAttributes(method.flags().0);
+            let impl_flags = w::MethodImplAttributes(method.impl_flags().0);
+
+            output.MethodDef(method.name(), signature_blob, flags, impl_flags);
+
+            for param in signature.params {
+                output.Param(
+                    param.def.name(),
+                    param.def.sequence(),
+                    w::ParamAttributes(param.def.flags().0),
+                );
+            }
         }
     }
 }
