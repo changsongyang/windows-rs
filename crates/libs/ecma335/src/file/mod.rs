@@ -288,6 +288,7 @@ impl File {
 
         for (name, value) in named {
             buffer.push(0x53); // field=0x53 property=0x54
+            self.Type(&value.ty(), &mut buffer);
             buffer.write_compressed(name.len());
             buffer.extend_from_slice(name.as_bytes());
             buffer.write_value(value);
