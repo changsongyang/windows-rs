@@ -13,9 +13,9 @@ pub struct File {
     AssemblyRef: HashMap<String, u32>,
 
     // Staging for sorted rows before these tables can be written. BTreeMap is used rather than HashMap to allow reproducible builds.
-    Attribute: BTreeMap<HasAttribute, Vec<(AttributeType, u32)>>,
-    Constant: BTreeMap<HasConstant, (u8, u32)>,
-    // TODO: may need to place TypeDef here as well due to secondary requirement to sort nested types
+    Attribute: BTreeMap<HasAttribute, Vec<Attribute>>,
+    Constant: BTreeMap<HasConstant, Constant>,
+    GenericParam: BTreeMap<TypeOrMethodDef, Vec<GenericParam>>,
 }
 
 impl File {
@@ -177,11 +177,34 @@ impl File {
 
     /// Adds an `Attribute` row to the file. This is a sorted table so the row offset is not yet available.
     pub fn Attribute(&mut self, parent: HasAttribute, ty: AttributeType, value: u32) {
-        self.Attribute.entry(parent).or_default().push((ty, value));
+        self.Attribute.entry(parent).or_default().push(Attribute {
+            Parent: parent,
+            Type: ty,
+            Value: value,
+        });
     }
 
     pub fn Constant(&mut self, parent: HasConstant, ty: u8, value: u32) {
-        self.Constant.insert(parent, (ty, value));
+        self.Constant.insert(
+            parent,
+            Constant {
+                Parent: parent,
+                Type: ty,
+                Value: value,
+            },
+        );
+    }
+
+    pub fn GenericParam(&mut self, name: &str, owner: TypeOrMethodDef, number: u16, flags: u16) {
+        self.GenericParam
+            .entry(owner)
+            .or_default()
+            .push(GenericParam {
+                Name: self.strings.insert(name),
+                Number: number,
+                Owner: owner,
+                Flags: flags,
+            });
     }
 
     /// Encodes the `Type` in the buffer. Any required `TypeRef` rows will be added to the file, returning the blob offset.

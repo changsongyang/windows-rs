@@ -39,23 +39,13 @@ impl<const LEN: usize> STREAM_HEADER<LEN> {
 
 impl File {
     pub fn into_stream(mut self) -> Vec<u8> {
-        for (parent, values) in self.Attribute {
-            for (ty, value) in values {
-                self.tables.Attribute.push(Attribute {
-                    Parent: parent,
-                    Type: ty,
-                    Value: value,
-                });
-            }
-        }
-
-        for (parent, (ty, value)) in self.Constant {
-            self.tables.Constant.push(Constant {
-                Parent: parent,
-                Type: ty,
-                Value: value,
-            });
-        }
+        self.tables
+            .Attribute
+            .extend(self.Attribute.values().flatten());
+        self.tables.Constant.extend(self.Constant.values());
+        self.tables
+            .GenericParam
+            .extend(self.GenericParam.values().flatten());
 
         let mut strings = self.strings.into_stream();
         let mut blobs = self.blobs.into_stream();

@@ -48,6 +48,11 @@ impl TypeDef {
             .collect()
     }
 
+    pub fn generic_params(&self) -> RowIterator<GenericParam> {
+        self.file()
+            .equal_range(2, TypeOrMethodDef::TypeDef(*self).encode())
+    }
+
     pub fn interface_impls(&self) -> RowIterator<InterfaceImpl> {
         self.file().equal_range(0, self.index() + 1)
     }

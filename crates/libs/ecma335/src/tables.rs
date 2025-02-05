@@ -86,6 +86,7 @@ pub struct ClassLayout {
     pub Parent: u32,
 }
 
+#[derive(Copy, Clone)]
 pub struct Constant {
     pub Type: u8,
     pub Parent: HasConstant,
@@ -116,6 +117,7 @@ pub struct Module {
     pub EncBaseId: u32,
 }
 
+#[derive(Copy, Clone)]
 pub struct GenericParam {
     pub Number: u16,
     pub Flags: u16,
@@ -144,6 +146,7 @@ pub struct TypeRef {
     pub TypeNamespace: u32,
 }
 
+#[derive(Copy, Clone)]
 pub struct Attribute {
     pub Parent: HasAttribute,
     pub Type: AttributeType,

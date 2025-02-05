@@ -81,8 +81,6 @@ fn write_attributes<R: r::HasAttributes>(output: &mut w::File, parent: w::HasAtt
 }
 
 fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
-    println!("{}.{}", def.namespace(), def.name());
-
     let flags = w::TypeAttributes(def.flags().0);
 
     let extends = if let Some(extends) = def.extends() {
@@ -108,7 +106,19 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
         }
     }
 
+    // TODO: may need to call write_attributes for methods/parameters/fields for Win32 metadata
     write_attributes(output, w::HasAttribute::TypeDef(type_def), def);
+
+    for interface in def.interface_impls() {}
+
+    for generic in def.generic_params() {
+        output.GenericParam(
+            generic.name(),
+            w::TypeOrMethodDef::TypeDef(type_def),
+            generic.sequence(),
+            generic.flags(),
+        );
+    }
 
     // Methods on classes is a huge overhead on .winmd size but adds no value as all of this information
     // is redundantly stored elsewhere.
