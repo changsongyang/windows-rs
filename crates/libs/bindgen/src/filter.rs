@@ -1,7 +1,7 @@
 use super::*;
 
 #[derive(Debug, Default)]
-pub struct Filter(Vec<(String, bool)>);
+pub struct Filter(Vec<(String, bool, bool)>);
 
 impl Filter {
     #[track_caller]
@@ -48,14 +48,14 @@ impl Filter {
         false
     }
 
-    pub fn includes_type_name(&self, name: TypeName) -> bool {
+    pub fn includes_type_name(&self, name: TypeName) -> (bool, bool) {
         for rule in &self.0 {
             if match_type_name(&rule.0, name.namespace(), name.name()) {
-                return rule.1;
+                return (rule.1, rule.2);
             }
         }
 
-        false
+        (false, false)
     }
 
     pub fn excludes_type_name(&self, name: TypeName) -> bool {
@@ -70,15 +70,26 @@ impl Filter {
 }
 
 #[track_caller]
-fn push_filter(reader: &Reader, rules: &mut Vec<(String, bool)>, filter: &str, include: bool) {
+fn push_filter(
+    reader: &Reader,
+    rules: &mut Vec<(String, bool, bool)>,
+    filter: &str,
+    include: bool,
+) {
+    let (filter, methods) = if let Some(prefix) = filter.strip_suffix('.') {
+        (prefix, true)
+    } else {
+        (filter, false)
+    };
+
     if reader.contains_key(filter) {
-        rules.push((filter.to_string(), include));
+        rules.push((filter.to_string(), include, methods));
         return;
     }
 
     if let Some((namespace, name)) = filter.rsplit_once('.') {
         if reader.with_full_name(namespace, name).next().is_some() {
-            rules.push((filter.to_string(), include));
+            rules.push((filter.to_string(), include, methods));
             return;
         }
     }
@@ -87,7 +98,7 @@ fn push_filter(reader: &Reader, rules: &mut Vec<(String, bool)>, filter: &str, i
 
     for (namespace, types) in reader.iter() {
         if types.get(filter).is_some() {
-            rules.push((format!("{namespace}.{filter}"), include));
+            rules.push((format!("{namespace}.{filter}"), include, methods));
             pushed = true;
         }
     }
@@ -100,7 +111,7 @@ fn push_filter(reader: &Reader, rules: &mut Vec<(String, bool)>, filter: &str, i
         .keys()
         .any(|namespace| namespace_starts_with(namespace, filter))
     {
-        rules.push((filter.to_string(), include));
+        rules.push((filter.to_string(), include, methods));
         return;
     }
 

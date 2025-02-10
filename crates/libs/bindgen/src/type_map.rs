@@ -4,11 +4,11 @@ use super::*;
 pub struct TypeMap(HashMap<TypeName, HashSet<Type>>);
 
 pub trait Dependencies {
-    fn combine(&self, dependencies: &mut TypeMap);
+    fn combine(&self, include_methods: bool, dependencies: &mut TypeMap);
 
     fn dependencies(&self) -> TypeMap {
         let mut dependencies = TypeMap::new();
-        self.combine(&mut dependencies);
+        self.combine(false, &mut dependencies);
         dependencies
     }
 }
@@ -33,11 +33,14 @@ impl TypeMap {
         for namespace in reader.keys() {
             if filter.includes_namespace(namespace) {
                 for (name, types) in &reader[namespace] {
-                    if filter.includes_type_name(TypeName(namespace, name)) {
+                    let (includes_type_name, include_methods) =
+                        filter.includes_type_name(TypeName(namespace, name));
+
+                    if includes_type_name {
                         let mut item_dependencies = Self::new();
 
                         for ty in types {
-                            ty.combine(&mut item_dependencies);
+                            ty.combine(include_methods, &mut item_dependencies);
                         }
 
                         if item_dependencies.excluded(filter) {

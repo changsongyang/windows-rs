@@ -138,8 +138,11 @@ impl CppConst {
 }
 
 impl Dependencies for CppConst {
-    fn combine(&self, dependencies: &mut TypeMap) {
-        self.field.ty(None).to_const_type().combine(dependencies);
+    fn combine(&self, _include_methods: bool, dependencies: &mut TypeMap) {
+        self.field
+            .ty(None)
+            .to_const_type()
+            .combine(false, dependencies);
     }
 }
 

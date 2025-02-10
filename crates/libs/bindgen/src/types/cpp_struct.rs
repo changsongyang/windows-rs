@@ -283,9 +283,9 @@ impl CppStruct {
 }
 
 impl Dependencies for CppStruct {
-    fn combine(&self, dependencies: &mut TypeMap) {
+    fn combine(&self, _include_methods: bool, dependencies: &mut TypeMap) {
         for field in self.def.fields() {
-            field.ty(Some(self)).combine(dependencies);
+            field.ty(Some(self)).combine(false, dependencies);
         }
 
         if let Some(attribute) = self.def.find_attribute("AlsoUsableForAttribute") {
@@ -293,7 +293,7 @@ impl Dependencies for CppStruct {
                 self.def
                     .reader()
                     .unwrap_full_name(self.def.namespace(), type_name)
-                    .combine(dependencies);
+                    .combine(false, dependencies);
             }
         }
     }

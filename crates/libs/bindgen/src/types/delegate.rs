@@ -205,11 +205,11 @@ impl Delegate {
 }
 
 impl Dependencies for Delegate {
-    fn combine(&self, dependencies: &mut TypeMap) {
+    fn combine(&self, _include_methods: bool, dependencies: &mut TypeMap) {
         dependencies.combine(&self.method().dependencies);
 
         for ty in &self.generics {
-            ty.combine(dependencies);
+            ty.combine(false, dependencies);
         }
     }
 }

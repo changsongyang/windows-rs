@@ -42,7 +42,7 @@ impl Signature {
 }
 
 impl Dependencies for Signature {
-    fn combine(&self, dependencies: &mut TypeMap) {
-        self.types().for_each(|ty| ty.combine(dependencies));
+    fn combine(&self, _include_methods: bool, dependencies: &mut TypeMap) {
+        self.types().for_each(|ty| ty.combine(false, dependencies));
     }
 }

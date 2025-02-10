@@ -930,7 +930,7 @@ impl Type {
 }
 
 impl Dependencies for Type {
-    fn combine(&self, dependencies: &mut TypeMap) {
+    fn combine(&self, include_methods: bool, dependencies: &mut TypeMap) {
         let ty = self.decay();
 
         if ty.is_intrinsic() {
@@ -948,7 +948,7 @@ impl Dependencies for Type {
         let (ty, generics) = ty.split_generic();
 
         for ty in generics {
-            ty.combine(dependencies);
+            ty.combine(false, dependencies);
         }
 
         if !nested && !dependencies.insert(ty.clone()) {
@@ -970,31 +970,31 @@ impl Dependencies for Type {
         } {
             multi.for_each(|multi| {
                 if ty != multi {
-                    multi.combine(dependencies)
+                    multi.combine(false, dependencies)
                 }
             });
         }
 
         match &ty {
-            Self::Class(ty) => ty.combine(dependencies),
-            Self::Delegate(ty) => ty.combine(dependencies),
+            Self::Class(ty) => ty.combine(include_methods, dependencies),
+            Self::Delegate(ty) => ty.combine(false, dependencies),
             Self::Enum(..) => {}
-            Self::Interface(ty) => ty.combine(dependencies),
-            Self::Struct(ty) => ty.combine(dependencies),
-            Self::CppConst(ty) => ty.combine(dependencies),
-            Self::CppDelegate(ty) => ty.combine(dependencies),
-            Self::CppFn(ty) => ty.combine(dependencies),
-            Self::CppInterface(ty) => ty.combine(dependencies),
-            Self::CppStruct(ty) => ty.combine(dependencies),
-            Self::CppEnum(ty) => ty.combine(dependencies),
+            Self::Interface(ty) => ty.combine(include_methods, dependencies),
+            Self::Struct(ty) => ty.combine(false, dependencies),
+            Self::CppConst(ty) => ty.combine(false, dependencies),
+            Self::CppDelegate(ty) => ty.combine(false, dependencies),
+            Self::CppFn(ty) => ty.combine(false, dependencies),
+            Self::CppInterface(ty) => ty.combine(include_methods, dependencies),
+            Self::CppStruct(ty) => ty.combine(false, dependencies),
+            Self::CppEnum(ty) => ty.combine(false, dependencies),
 
             Self::IUnknown => {
-                Self::GUID.combine(dependencies);
-                Self::HRESULT.combine(dependencies);
+                Self::GUID.combine(false, dependencies);
+                Self::HRESULT.combine(false, dependencies);
             }
 
             Self::Object => {
-                Self::IUnknown.combine(dependencies);
+                Self::IUnknown.combine(false, dependencies);
             }
 
             _ => {}

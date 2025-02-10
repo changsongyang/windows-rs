@@ -109,9 +109,9 @@ impl Struct {
 }
 
 impl Dependencies for Struct {
-    fn combine(&self, dependencies: &mut TypeMap) {
+    fn combine(&self, _include_methods: bool, dependencies: &mut TypeMap) {
         for field in self.def.fields() {
-            field.ty(None).combine(dependencies);
+            field.ty(None).combine(false, dependencies);
         }
     }
 }

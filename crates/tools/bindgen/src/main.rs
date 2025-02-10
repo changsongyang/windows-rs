@@ -166,6 +166,23 @@ fn main() {
     // Tests for dependency tracking
     test("--out deps.rs --filter FreeLibrary GetProcAddress LoadLibraryExA LOAD_LIBRARY_SEARCH_DEFAULT_DIRS --sys");
 
+    // Tests for including method dependencies for classes
+    test("--out include_methods_class_default.rs --filter MemoryBuffer");
+    test("--out include_methods_class_include.rs --filter MemoryBuffer.");
+    // ...and WinRT interfaces
+    test("--out include_methods_interface_default.rs --filter IAsyncAction");
+    test("--out include_methods_interface_include.rs --filter IAsyncAction.");
+    // ...with and without namespaces
+    test("--out include_methods_interface_default_namespace.rs --filter Windows.Foundation.IAsyncAction");
+    test("--out include_methods_interface_include_namespace.rs --filter Windows.Foundation.IAsyncAction.");
+    // ...and for COM interfaces
+    test("--out include_methods_cpp_interface_default.rs --filter IMMDevice");
+    test("--out include_methods_cpp_interface_include.rs --filter IMMDevice.");
+    test("--out include_methods_cpp_interface_persist_default.rs --filter IAVIPersistFile");
+    test("--out include_methods_cpp_interface_persist_include.rs --filter IAVIPersistFile.");
+    test("--out include_methods_cpp_interface_variant_default.rs --filter IEnumVARIANT");
+    test("--out include_methods_cpp_interface_variant_include.rs --filter IEnumVARIANT.");
+
     // Tests for sort order
     test("--out sort.rs --filter E_FAIL S_FALSE E_OUTOFMEMORY ERROR_OUTOFMEMORY Windows.Foundation.Rect RECT GetTickCount FatalExit --sys --no-core");
 

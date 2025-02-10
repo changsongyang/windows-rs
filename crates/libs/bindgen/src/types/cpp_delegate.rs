@@ -66,10 +66,10 @@ impl CppDelegate {
 }
 
 impl Dependencies for CppDelegate {
-    fn combine(&self, dependencies: &mut TypeMap) {
+    fn combine(&self, _include_methods: bool, dependencies: &mut TypeMap) {
         self.method()
             .signature(self.def.namespace(), &[])
-            .combine(dependencies);
+            .combine(false, dependencies);
     }
 }
 

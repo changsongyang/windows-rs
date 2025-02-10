@@ -442,17 +442,17 @@ impl CppInterface {
 }
 
 impl Dependencies for CppInterface {
-    fn combine(&self, dependencies: &mut TypeMap) {
+    fn combine(&self, include_methods: bool, dependencies: &mut TypeMap) {
         let base_interfaces = self.base_interfaces();
 
         for interface in &base_interfaces {
-            interface.combine(dependencies);
+            interface.combine(include_methods, dependencies);
         }
 
         for method in self.def.methods() {
             for ty in method.signature(self.def.namespace(), &[]).types() {
-                if ty.is_core() {
-                    ty.combine(dependencies);
+                if include_methods || ty.is_core() {
+                    ty.combine(false, dependencies);
                 }
             }
         }

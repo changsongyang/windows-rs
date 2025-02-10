@@ -251,10 +251,10 @@ impl CppFn {
 }
 
 impl Dependencies for CppFn {
-    fn combine(&self, dependencies: &mut TypeMap) {
+    fn combine(&self, _include_methods: bool, dependencies: &mut TypeMap) {
         self.method
             .signature(self.namespace, &[])
-            .combine(dependencies);
+            .combine(false, dependencies);
 
         let dependency = match self.method.name() {
             "GetWindowLongPtrA" => Some("GetWindowLongA"),
@@ -268,7 +268,7 @@ impl Dependencies for CppFn {
             self.method
                 .reader()
                 .unwrap_full_name(self.namespace, dependency)
-                .combine(dependencies);
+                .combine(false, dependencies);
         }
     }
 }

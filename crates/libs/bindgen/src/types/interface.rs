@@ -560,16 +560,16 @@ impl Interface {
 }
 
 impl Dependencies for Interface {
-    fn combine(&self, dependencies: &mut TypeMap) {
-        Type::Object.combine(dependencies);
+    fn combine(&self, include_methods: bool, dependencies: &mut TypeMap) {
+        Type::Object.combine(false, dependencies);
 
         for interface in self.required_interfaces() {
-            Type::Interface(interface).combine(dependencies);
+            Type::Interface(interface).combine(include_methods, dependencies);
         }
 
         // Different specializations of Interface may have different generics...
         for ty in &self.generics {
-            ty.combine(dependencies);
+            ty.combine(false, dependencies);
         }
 
         let is_iterable = self.type_name() == TypeName::IIterable;
@@ -579,8 +579,8 @@ impl Dependencies for Interface {
                 .signature(self.def.namespace(), &self.generics)
                 .types()
             {
-                if is_iterable || ty.is_core() {
-                    ty.combine(dependencies);
+                if include_methods || is_iterable || ty.is_core() {
+                    ty.combine(false, dependencies);
                 }
             }
         }

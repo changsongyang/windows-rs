@@ -134,13 +134,13 @@ impl CppEnum {
 }
 
 impl Dependencies for CppEnum {
-    fn combine(&self, dependencies: &mut TypeMap) {
+    fn combine(&self, _include_methods: bool, dependencies: &mut TypeMap) {
         if let Some(attribute) = self.def.find_attribute("AlsoUsableForAttribute") {
             if let Some((_, Value::Str(type_name))) = attribute.args().first() {
                 self.def
                     .reader()
                     .unwrap_full_name(self.def.namespace(), type_name)
-                    .combine(dependencies);
+                    .combine(false, dependencies);
             }
         }
     }

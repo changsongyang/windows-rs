@@ -347,9 +347,9 @@ impl Class {
 }
 
 impl Dependencies for Class {
-    fn combine(&self, dependencies: &mut TypeMap) {
+    fn combine(&self, include_methods: bool, dependencies: &mut TypeMap) {
         for interface in self.required_interfaces() {
-            Type::Interface(interface).combine(dependencies);
+            Type::Interface(interface).combine(include_methods, dependencies);
         }
     }
 }
