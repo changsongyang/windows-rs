@@ -13,9 +13,10 @@ pub struct File {
     AssemblyRef: HashMap<String, u32>,
 
     // Staging for sorted rows before these tables can be written. BTreeMap is used rather than HashMap to allow reproducible builds.
-    Attribute: BTreeMap<HasAttribute, Vec<Attribute>>,
     Constant: BTreeMap<HasConstant, Constant>,
+    Attribute: BTreeMap<HasAttribute, Vec<Attribute>>,
     GenericParam: BTreeMap<TypeOrMethodDef, Vec<GenericParam>>,
+    InterfaceImpl: BTreeMap<u32, Vec<InterfaceImpl>>,
 }
 
 impl File {
@@ -131,6 +132,26 @@ impl File {
         pos
     }
 
+    pub fn TypeSpec(&mut self, tn: &TypeName) -> u32 {
+        debug_assert!(!tn.generics.is_empty());
+
+        let type_ref = self.TypeRef(tn.namespace, tn.name);
+
+        let mut buffer = vec![];
+        buffer.push(ELEMENT_TYPE_GENERICINST);
+        buffer.push(ELEMENT_TYPE_CLASS);
+        buffer.write_compressed(TypeDefOrRef::TypeRef(type_ref).encode() as usize);
+        buffer.write_compressed(tn.generics.len());
+
+        for ty in &tn.generics {
+            self.Type(ty, &mut buffer);
+        }
+
+        self.tables.TypeSpec.push_pos(TypeSpec{
+            Signature: self.blobs.insert(&buffer),
+        })
+    }
+
     /// Adds a `Field` row to the file, returning the row offset.
     pub fn Field(&mut self, name: &str, signature: u32, flags: FieldAttributes) -> u32 {
         self.tables.Field.push_pos(Field {
@@ -207,6 +228,10 @@ impl File {
             });
     }
 
+    pub fn InterfaceImpl(&mut self, type_def: u32, interface: TypeDefOrRef) {
+        self.InterfaceImpl.entry(type_def).or_default().push(InterfaceImpl{ Class: type_def, Interface: interface });
+    }
+
     /// Encodes the `Type` in the buffer. Any required `TypeRef` rows will be added to the file, returning the blob offset.
     fn Type(&mut self, ty: &Type, buffer: &mut Vec<u8>) {
         match ty {
@@ -264,6 +289,10 @@ impl File {
                 }
             }
 
+            Type::Generic(number) => {
+                buffer.push(ELEMENT_TYPE_VAR);
+                buffer.write_compressed(*number);
+            },
             Type::Type => self.Type(&Type::new("System", "Type"), buffer),
         }
     }

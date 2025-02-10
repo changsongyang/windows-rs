@@ -72,6 +72,7 @@ impl Blob {
         mods
     }
 
+    // TODO: read_compressed
     pub fn read_usize(&mut self) -> usize {
         let (value, offset) = self.peek();
         self.offset(offset);

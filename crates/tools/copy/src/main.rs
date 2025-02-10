@@ -109,7 +109,23 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
     // TODO: may need to call write_attributes for methods/parameters/fields for Win32 metadata
     write_attributes(output, w::HasAttribute::TypeDef(type_def), def);
 
-    for interface in def.interface_impls() {}
+    let generics = def.generics();
+
+    for interface in def.interface_impls() {
+        let interface = convert_type(&interface.ty(&generics));
+
+        let interface = if let w::Type::Name(tn) = interface {
+            if tn.generics.is_empty() {
+                w::TypeDefOrRef::TypeRef(output.TypeRef(tn.namespace, tn.name))
+            } else {
+                w::TypeDefOrRef::TypeSpec(output.TypeSpec(&tn))
+            }
+        } else {
+            panic!();
+        };
+
+        output.InterfaceImpl(type_def, interface);
+    }
 
     for generic in def.generic_params() {
         output.GenericParam(
@@ -124,7 +140,7 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
     // is redundantly stored elsewhere.
     if include_methods {
         for method in def.methods() {
-            let signature = method.signature("", &[]);
+            let signature = method.signature("", &generics);
             let types: Vec<w::Type> = signature
                 .params
                 .iter()
@@ -185,6 +201,7 @@ fn convert_type(input: &r::Type) -> w::Type<'static> {
             name: ty.def.name(),
             generics: ty.generics.iter().map(|ty| convert_type(ty)).collect(),
         }),
+        r::Type::Generic(name) => w::Type::Generic(name.sequence() as usize),
         rest => panic!("{rest:?}"),
     }
 }

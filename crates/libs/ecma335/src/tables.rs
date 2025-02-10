@@ -55,6 +55,7 @@ pub struct Assembly {
     pub Culture: u32,
 }
 
+#[derive(Copy, Clone)]
 pub struct InterfaceImpl {
     pub Class: u32,
     pub Interface: TypeDefOrRef,
