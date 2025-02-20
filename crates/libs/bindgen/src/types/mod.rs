@@ -365,7 +365,7 @@ impl Type {
         )
     }
 
-    pub fn write_name(&self, writer: &Writer) -> TokenStream {
+    pub fn write_name(&self, writer: &Writer<'_>) -> TokenStream {
         if writer.config.sys && self.is_interface() {
             return quote! { *mut core::ffi::c_void };
         }
@@ -471,7 +471,7 @@ impl Type {
         }
     }
 
-    pub fn write_default(&self, writer: &Writer) -> TokenStream {
+    pub fn write_default(&self, writer: &Writer<'_>) -> TokenStream {
         if writer.config.sys {
             return self.write_name(writer);
         }
@@ -491,7 +491,7 @@ impl Type {
         }
     }
 
-    pub fn write_impl_name(&self, writer: &Writer) -> TokenStream {
+    pub fn write_impl_name(&self, writer: &Writer<'_>) -> TokenStream {
         match self {
             Self::IUnknown | Self::Object => {
                 let name = writer.write_core();
@@ -503,7 +503,7 @@ impl Type {
         }
     }
 
-    pub fn write_abi(&self, writer: &Writer) -> TokenStream {
+    pub fn write_abi(&self, writer: &Writer<'_>) -> TokenStream {
         if writer.config.sys {
             return self.write_name(writer);
         }
@@ -790,8 +790,8 @@ impl Type {
         }
     }
 
-    fn write_no_deps(&self, writer: &Writer) -> TokenStream {
-        if !writer.config.no_core {
+    fn write_no_deps(&self, writer: &Writer<'_>) -> TokenStream {
+        if !writer.config.no_deps || !writer.config.sys {
             return quote! {};
         }
 
@@ -846,7 +846,7 @@ impl Type {
         }
     }
 
-    pub fn write(&self, writer: &Writer) -> TokenStream {
+    pub fn write(&self, writer: &Writer<'_>) -> TokenStream {
         match self {
             Self::Struct(ty) => ty.write(writer),
             Self::Enum(ty) => ty.write(writer),
