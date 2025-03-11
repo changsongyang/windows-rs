@@ -21,7 +21,6 @@ impl Delegate {
 
     pub fn write(&self, writer: &Writer<'_>) -> TokenStream {
         let name = self.write_name(writer);
-        //let vtbl_name = self.write_vtbl_name(writer);
         let vtbl_name: TokenStream = format!("{}_Vtbl", self.def.name()).into();
         let boxed: TokenStream = format!("{}Box", self.def.name()).into();
         let generic_names = self.generics.iter().map(|ty| ty.write_name(writer));
@@ -109,6 +108,7 @@ impl Delegate {
             }
             #cfg
             #[repr(C)]
+            #[doc(hidden)]
             pub struct #vtbl_name<#generic_names> where #constraints {
                 base__: windows_core::IUnknown_Vtbl,
                 Invoke: unsafe extern "system" fn(#invoke_vtbl) -> windows_core::HRESULT,
@@ -140,6 +140,9 @@ impl Delegate {
                             *iid == <windows_core::IUnknown as windows_core::Interface>::IID ||
                             *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID {
                                 &mut (*this).vtable as *mut _ as _
+                            } else if *iid == <windows_core::imp::IMarshal as windows_core::Interface>::IID {
+                                (*this).count.add_ref();
+                                return windows_core::imp::marshaler(core::mem::transmute(&mut (*this).vtable as *mut _ as *mut core::ffi::c_void), interface);
                             } else {
                                 core::ptr::null_mut()
                             };

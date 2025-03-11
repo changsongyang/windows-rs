@@ -38,6 +38,7 @@ impl AsyncActionCompletedHandler {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct AsyncActionCompletedHandler_Vtbl {
     base__: windows_core::IUnknown_Vtbl,
     Invoke: unsafe extern "system" fn(
@@ -85,6 +86,12 @@ impl<
                 || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID
             {
                 &mut (*this).vtable as *mut _ as _
+            } else if *iid == <windows_core::imp::IMarshal as windows_core::Interface>::IID {
+                (*this).count.add_ref();
+                return windows_core::imp::marshaler(
+                    core::mem::transmute(&mut (*this).vtable as *mut _ as *mut core::ffi::c_void),
+                    interface,
+                );
             } else {
                 core::ptr::null_mut()
             };
@@ -182,6 +189,7 @@ impl<TProgress: windows_core::RuntimeType + 'static> AsyncActionProgressHandler<
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct AsyncActionProgressHandler_Vtbl<TProgress>
 where
     TProgress: windows_core::RuntimeType + 'static,
@@ -246,6 +254,12 @@ impl<
                 || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID
             {
                 &mut (*this).vtable as *mut _ as _
+            } else if *iid == <windows_core::imp::IMarshal as windows_core::Interface>::IID {
+                (*this).count.add_ref();
+                return windows_core::imp::marshaler(
+                    core::mem::transmute(&mut (*this).vtable as *mut _ as *mut core::ffi::c_void),
+                    interface,
+                );
             } else {
                 core::ptr::null_mut()
             };
@@ -348,6 +362,7 @@ impl<TProgress: windows_core::RuntimeType + 'static>
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct AsyncActionWithProgressCompletedHandler_Vtbl<TProgress>
 where
     TProgress: windows_core::RuntimeType + 'static,
@@ -406,7 +421,7 @@ impl<
             if iid.is_null() || interface.is_null() {
                 return windows_core::HRESULT(-2147467261);
             }
-            * interface = if * iid == < AsyncActionWithProgressCompletedHandler < TProgress > as windows_core::Interface >::IID || * iid == < windows_core::IUnknown as windows_core::Interface >::IID || * iid == < windows_core::imp::IAgileObject as windows_core::Interface >::IID { & mut ( * this ) . vtable as * mut _ as _ } else { core::ptr::null_mut ( ) } ;
+            * interface = if * iid == < AsyncActionWithProgressCompletedHandler < TProgress > as windows_core::Interface >::IID || * iid == < windows_core::IUnknown as windows_core::Interface >::IID || * iid == < windows_core::imp::IAgileObject as windows_core::Interface >::IID { & mut ( * this ) . vtable as * mut _ as _ } else if * iid == < windows_core::imp::IMarshal as windows_core::Interface >::IID { ( * this ) . count . add_ref ( ) ; return windows_core::imp::marshaler ( core::mem::transmute ( & mut ( * this ) . vtable as * mut _ as * mut core::ffi::c_void ) , interface ) ; } else { core::ptr::null_mut ( ) } ;
             if (*interface).is_null() {
                 windows_core::HRESULT(-2147467262)
             } else {
@@ -500,6 +515,7 @@ impl<TResult: windows_core::RuntimeType + 'static> AsyncOperationCompletedHandle
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct AsyncOperationCompletedHandler_Vtbl<TResult>
 where
     TResult: windows_core::RuntimeType + 'static,
@@ -564,6 +580,12 @@ impl<
                 || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID
             {
                 &mut (*this).vtable as *mut _ as _
+            } else if *iid == <windows_core::imp::IMarshal as windows_core::Interface>::IID {
+                (*this).count.add_ref();
+                return windows_core::imp::marshaler(
+                    core::mem::transmute(&mut (*this).vtable as *mut _ as *mut core::ffi::c_void),
+                    interface,
+                );
             } else {
                 core::ptr::null_mut()
             };
@@ -673,6 +695,7 @@ impl<
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct AsyncOperationProgressHandler_Vtbl<TResult, TProgress>
 where
     TResult: windows_core::RuntimeType + 'static,
@@ -737,7 +760,7 @@ impl<
             if iid.is_null() || interface.is_null() {
                 return windows_core::HRESULT(-2147467261);
             }
-            * interface = if * iid == < AsyncOperationProgressHandler < TResult , TProgress > as windows_core::Interface >::IID || * iid == < windows_core::IUnknown as windows_core::Interface >::IID || * iid == < windows_core::imp::IAgileObject as windows_core::Interface >::IID { & mut ( * this ) . vtable as * mut _ as _ } else { core::ptr::null_mut ( ) } ;
+            * interface = if * iid == < AsyncOperationProgressHandler < TResult , TProgress > as windows_core::Interface >::IID || * iid == < windows_core::IUnknown as windows_core::Interface >::IID || * iid == < windows_core::imp::IAgileObject as windows_core::Interface >::IID { & mut ( * this ) . vtable as * mut _ as _ } else if * iid == < windows_core::imp::IMarshal as windows_core::Interface >::IID { ( * this ) . count . add_ref ( ) ; return windows_core::imp::marshaler ( core::mem::transmute ( & mut ( * this ) . vtable as * mut _ as * mut core::ffi::c_void ) , interface ) ; } else { core::ptr::null_mut ( ) } ;
             if (*interface).is_null() {
                 windows_core::HRESULT(-2147467262)
             } else {
@@ -847,6 +870,7 @@ impl<
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct AsyncOperationWithProgressCompletedHandler_Vtbl<TResult, TProgress>
 where
     TResult: windows_core::RuntimeType + 'static,
@@ -911,7 +935,7 @@ impl<
             if iid.is_null() || interface.is_null() {
                 return windows_core::HRESULT(-2147467261);
             }
-            * interface = if * iid == < AsyncOperationWithProgressCompletedHandler < TResult , TProgress > as windows_core::Interface >::IID || * iid == < windows_core::IUnknown as windows_core::Interface >::IID || * iid == < windows_core::imp::IAgileObject as windows_core::Interface >::IID { & mut ( * this ) . vtable as * mut _ as _ } else { core::ptr::null_mut ( ) } ;
+            * interface = if * iid == < AsyncOperationWithProgressCompletedHandler < TResult , TProgress > as windows_core::Interface >::IID || * iid == < windows_core::IUnknown as windows_core::Interface >::IID || * iid == < windows_core::imp::IAgileObject as windows_core::Interface >::IID { & mut ( * this ) . vtable as * mut _ as _ } else if * iid == < windows_core::imp::IMarshal as windows_core::Interface >::IID { ( * this ) . count . add_ref ( ) ; return windows_core::imp::marshaler ( core::mem::transmute ( & mut ( * this ) . vtable as * mut _ as * mut core::ffi::c_void ) , interface ) ; } else { core::ptr::null_mut ( ) } ;
             if (*interface).is_null() {
                 windows_core::HRESULT(-2147467262)
             } else {
@@ -1123,6 +1147,7 @@ impl IAsyncAction_Vtbl {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IAsyncAction_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub SetCompleted: unsafe extern "system" fn(
@@ -1423,6 +1448,7 @@ impl<TProgress: windows_core::RuntimeType + 'static> IAsyncActionWithProgress_Vt
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IAsyncActionWithProgress_Vtbl<TProgress>
 where
     TProgress: windows_core::RuntimeType + 'static,
@@ -1602,6 +1628,7 @@ impl IAsyncInfo_Vtbl {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IAsyncInfo_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub Id: unsafe extern "system" fn(*mut core::ffi::c_void, *mut u32) -> windows_core::HRESULT,
@@ -1827,6 +1854,7 @@ impl<TResult: windows_core::RuntimeType + 'static> IAsyncOperation_Vtbl<TResult>
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IAsyncOperation_Vtbl<TResult>
 where
     TResult: windows_core::RuntimeType + 'static,
@@ -2189,6 +2217,7 @@ impl<
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IAsyncOperationWithProgress_Vtbl<TResult, TProgress>
 where
     TResult: windows_core::RuntimeType + 'static,

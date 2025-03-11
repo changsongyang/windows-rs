@@ -6,15 +6,21 @@ members = [
     "crates/samples/windows/*",
     "crates/samples/components/*",
     "crates/targets/*",
-    "crates/tests/bindgen",
     "crates/tests/misc/*",
     "crates/tests/libs/*",
     "crates/tests/winrt/*",
+    "crates/tests/libs/*",
     "crates/tools/*",
 ]
 exclude = [
     "crates/targets/baseline",
 ]
+
+# This compiles external dependencies (outside crates) with full optimization.
+# This can improve run time while iterating on development (testing, etc.).
+# This has NO EFFECT on end users using windows-* crates.
+[profile.dev.package."*"]
+opt-level = 2
 
 [workspace.lints.rust]
 rust_2018_idioms = { level = "warn", priority = -1 }
@@ -38,4 +44,4 @@ windows-sys = { path = "crates/libs/sys" }
 windows-targets = { path = "crates/libs/targets" }
 windows-version = { path = "crates/libs/version" }
 windows-ecma335 = { path = "crates/libs/ecma335" }
-helpers = { path = "crates/libs/helpers" }
+helpers = { path = "crates/tools/helpers" }

@@ -51,6 +51,7 @@ impl ComponentLoadFailedEventHandler {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct ComponentLoadFailedEventHandler_Vtbl {
     base__: windows_core::IUnknown_Vtbl,
     Invoke: unsafe extern "system" fn(this: *mut core::ffi::c_void, sender: *mut core::ffi::c_void, e: *mut core::ffi::c_void) -> windows_core::HRESULT,
@@ -69,7 +70,14 @@ impl<F: FnMut(windows_core::Ref<'_, MediaProtectionManager>, windows_core::Ref<'
             if iid.is_null() || interface.is_null() {
                 return windows_core::HRESULT(-2147467261);
             }
-            *interface = if *iid == <ComponentLoadFailedEventHandler as windows_core::Interface>::IID || *iid == <windows_core::IUnknown as windows_core::Interface>::IID || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID { &mut (*this).vtable as *mut _ as _ } else { core::ptr::null_mut() };
+            *interface = if *iid == <ComponentLoadFailedEventHandler as windows_core::Interface>::IID || *iid == <windows_core::IUnknown as windows_core::Interface>::IID || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID {
+                &mut (*this).vtable as *mut _ as _
+            } else if *iid == <windows_core::imp::IMarshal as windows_core::Interface>::IID {
+                (*this).count.add_ref();
+                return windows_core::imp::marshaler(core::mem::transmute(&mut (*this).vtable as *mut _ as *mut core::ffi::c_void), interface);
+            } else {
+                core::ptr::null_mut()
+            };
             if (*interface).is_null() {
                 windows_core::HRESULT(-2147467262)
             } else {
@@ -236,6 +244,7 @@ impl windows_core::RuntimeType for IComponentLoadFailedEventArgs {
     const SIGNATURE: windows_core::imp::ConstBuffer = windows_core::imp::ConstBuffer::for_interface::<Self>();
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IComponentLoadFailedEventArgs_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub Information: unsafe extern "system" fn(*mut core::ffi::c_void, *mut *mut core::ffi::c_void) -> windows_core::HRESULT,
@@ -246,6 +255,7 @@ impl windows_core::RuntimeType for IComponentRenewalStatics {
     const SIGNATURE: windows_core::imp::ConstBuffer = windows_core::imp::ConstBuffer::for_interface::<Self>();
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IComponentRenewalStatics_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub RenewSystemComponentsAsync: unsafe extern "system" fn(*mut core::ffi::c_void, *mut core::ffi::c_void, *mut *mut core::ffi::c_void) -> windows_core::HRESULT,
@@ -255,6 +265,7 @@ impl windows_core::RuntimeType for IHdcpSession {
     const SIGNATURE: windows_core::imp::ConstBuffer = windows_core::imp::ConstBuffer::for_interface::<Self>();
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IHdcpSession_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub IsEffectiveProtectionAtLeast: unsafe extern "system" fn(*mut core::ffi::c_void, HdcpProtection, *mut bool) -> windows_core::HRESULT,
@@ -268,6 +279,7 @@ impl windows_core::RuntimeType for IMediaProtectionManager {
     const SIGNATURE: windows_core::imp::ConstBuffer = windows_core::imp::ConstBuffer::for_interface::<Self>();
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IMediaProtectionManager_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub ServiceRequested: unsafe extern "system" fn(*mut core::ffi::c_void, *mut core::ffi::c_void, *mut i64) -> windows_core::HRESULT,
@@ -286,6 +298,7 @@ impl windows_core::RuntimeType for IMediaProtectionPMPServer {
     const SIGNATURE: windows_core::imp::ConstBuffer = windows_core::imp::ConstBuffer::for_interface::<Self>();
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IMediaProtectionPMPServer_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     #[cfg(feature = "Foundation_Collections")]
@@ -298,6 +311,7 @@ impl windows_core::RuntimeType for IMediaProtectionPMPServerFactory {
     const SIGNATURE: windows_core::imp::ConstBuffer = windows_core::imp::ConstBuffer::for_interface::<Self>();
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IMediaProtectionPMPServerFactory_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     #[cfg(feature = "Foundation_Collections")]
@@ -310,6 +324,7 @@ impl windows_core::RuntimeType for IMediaProtectionServiceCompletion {
     const SIGNATURE: windows_core::imp::ConstBuffer = windows_core::imp::ConstBuffer::for_interface::<Self>();
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IMediaProtectionServiceCompletion_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub Complete: unsafe extern "system" fn(*mut core::ffi::c_void, bool) -> windows_core::HRESULT,
@@ -379,6 +394,7 @@ impl IMediaProtectionServiceRequest_Vtbl {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IMediaProtectionServiceRequest_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub ProtectionSystem: unsafe extern "system" fn(*mut core::ffi::c_void, *mut windows_core::GUID) -> windows_core::HRESULT,
@@ -389,6 +405,7 @@ impl windows_core::RuntimeType for IProtectionCapabilities {
     const SIGNATURE: windows_core::imp::ConstBuffer = windows_core::imp::ConstBuffer::for_interface::<Self>();
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IProtectionCapabilities_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub IsTypeSupported: unsafe extern "system" fn(*mut core::ffi::c_void, *mut core::ffi::c_void, *mut core::ffi::c_void, *mut ProtectionCapabilityResult) -> windows_core::HRESULT,
@@ -398,6 +415,7 @@ impl windows_core::RuntimeType for IRevocationAndRenewalInformation {
     const SIGNATURE: windows_core::imp::ConstBuffer = windows_core::imp::ConstBuffer::for_interface::<Self>();
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IRevocationAndRenewalInformation_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub Items: unsafe extern "system" fn(*mut core::ffi::c_void, *mut *mut core::ffi::c_void) -> windows_core::HRESULT,
@@ -407,6 +425,7 @@ impl windows_core::RuntimeType for IRevocationAndRenewalItem {
     const SIGNATURE: windows_core::imp::ConstBuffer = windows_core::imp::ConstBuffer::for_interface::<Self>();
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IRevocationAndRenewalItem_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub Reasons: unsafe extern "system" fn(*mut core::ffi::c_void, *mut RevocationAndRenewalReasons) -> windows_core::HRESULT,
@@ -420,6 +439,7 @@ impl windows_core::RuntimeType for IServiceRequestedEventArgs {
     const SIGNATURE: windows_core::imp::ConstBuffer = windows_core::imp::ConstBuffer::for_interface::<Self>();
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IServiceRequestedEventArgs_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub Request: unsafe extern "system" fn(*mut core::ffi::c_void, *mut *mut core::ffi::c_void) -> windows_core::HRESULT,
@@ -430,6 +450,7 @@ impl windows_core::RuntimeType for IServiceRequestedEventArgs2 {
     const SIGNATURE: windows_core::imp::ConstBuffer = windows_core::imp::ConstBuffer::for_interface::<Self>();
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IServiceRequestedEventArgs2_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     #[cfg(feature = "Media_Playback")]
@@ -638,6 +659,7 @@ impl RebootNeededEventHandler {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct RebootNeededEventHandler_Vtbl {
     base__: windows_core::IUnknown_Vtbl,
     Invoke: unsafe extern "system" fn(this: *mut core::ffi::c_void, sender: *mut core::ffi::c_void) -> windows_core::HRESULT,
@@ -656,7 +678,14 @@ impl<F: FnMut(windows_core::Ref<'_, MediaProtectionManager>) -> windows_core::Re
             if iid.is_null() || interface.is_null() {
                 return windows_core::HRESULT(-2147467261);
             }
-            *interface = if *iid == <RebootNeededEventHandler as windows_core::Interface>::IID || *iid == <windows_core::IUnknown as windows_core::Interface>::IID || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID { &mut (*this).vtable as *mut _ as _ } else { core::ptr::null_mut() };
+            *interface = if *iid == <RebootNeededEventHandler as windows_core::Interface>::IID || *iid == <windows_core::IUnknown as windows_core::Interface>::IID || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID {
+                &mut (*this).vtable as *mut _ as _
+            } else if *iid == <windows_core::imp::IMarshal as windows_core::Interface>::IID {
+                (*this).count.add_ref();
+                return windows_core::imp::marshaler(core::mem::transmute(&mut (*this).vtable as *mut _ as *mut core::ffi::c_void), interface);
+            } else {
+                core::ptr::null_mut()
+            };
             if (*interface).is_null() {
                 windows_core::HRESULT(-2147467262)
             } else {
@@ -900,6 +929,7 @@ impl ServiceRequestedEventHandler {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct ServiceRequestedEventHandler_Vtbl {
     base__: windows_core::IUnknown_Vtbl,
     Invoke: unsafe extern "system" fn(this: *mut core::ffi::c_void, sender: *mut core::ffi::c_void, e: *mut core::ffi::c_void) -> windows_core::HRESULT,
@@ -918,7 +948,14 @@ impl<F: FnMut(windows_core::Ref<'_, MediaProtectionManager>, windows_core::Ref<'
             if iid.is_null() || interface.is_null() {
                 return windows_core::HRESULT(-2147467261);
             }
-            *interface = if *iid == <ServiceRequestedEventHandler as windows_core::Interface>::IID || *iid == <windows_core::IUnknown as windows_core::Interface>::IID || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID { &mut (*this).vtable as *mut _ as _ } else { core::ptr::null_mut() };
+            *interface = if *iid == <ServiceRequestedEventHandler as windows_core::Interface>::IID || *iid == <windows_core::IUnknown as windows_core::Interface>::IID || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID {
+                &mut (*this).vtable as *mut _ as _
+            } else if *iid == <windows_core::imp::IMarshal as windows_core::Interface>::IID {
+                (*this).count.add_ref();
+                return windows_core::imp::marshaler(core::mem::transmute(&mut (*this).vtable as *mut _ as *mut core::ffi::c_void), interface);
+            } else {
+                core::ptr::null_mut()
+            };
             if (*interface).is_null() {
                 windows_core::HRESULT(-2147467262)
             } else {

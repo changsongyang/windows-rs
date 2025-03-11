@@ -92,6 +92,7 @@ impl<K: windows_core::RuntimeType + 'static> IMapChangedEventArgs_Vtbl<K> {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IMapChangedEventArgs_Vtbl<K>
 where
     K: windows_core::RuntimeType + 'static,
@@ -259,6 +260,7 @@ impl<K: windows_core::RuntimeType + 'static, V: windows_core::RuntimeType + 'sta
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IObservableMap_Vtbl<K, V>
 where
     K: windows_core::RuntimeType + 'static,
@@ -444,6 +446,7 @@ impl<T: windows_core::RuntimeType + 'static> IObservableVector_Vtbl<T> {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IObservableVector_Vtbl<T>
 where
     T: windows_core::RuntimeType + 'static,
@@ -555,6 +558,7 @@ impl IPropertySet_Vtbl {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IPropertySet_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
 }
@@ -623,6 +627,7 @@ impl IVectorChangedEventArgs_Vtbl {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IVectorChangedEventArgs_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub CollectionChange: unsafe extern "system" fn(*mut core::ffi::c_void, *mut CollectionChange) -> windows_core::HRESULT,
@@ -656,6 +661,7 @@ impl<K: windows_core::RuntimeType + 'static, V: windows_core::RuntimeType + 'sta
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct MapChangedEventHandler_Vtbl<K, V>
 where
     K: windows_core::RuntimeType + 'static,
@@ -689,7 +695,14 @@ impl<K: windows_core::RuntimeType + 'static, V: windows_core::RuntimeType + 'sta
             if iid.is_null() || interface.is_null() {
                 return windows_core::HRESULT(-2147467261);
             }
-            *interface = if *iid == <MapChangedEventHandler<K, V> as windows_core::Interface>::IID || *iid == <windows_core::IUnknown as windows_core::Interface>::IID || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID { &mut (*this).vtable as *mut _ as _ } else { core::ptr::null_mut() };
+            *interface = if *iid == <MapChangedEventHandler<K, V> as windows_core::Interface>::IID || *iid == <windows_core::IUnknown as windows_core::Interface>::IID || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID {
+                &mut (*this).vtable as *mut _ as _
+            } else if *iid == <windows_core::imp::IMarshal as windows_core::Interface>::IID {
+                (*this).count.add_ref();
+                return windows_core::imp::marshaler(core::mem::transmute(&mut (*this).vtable as *mut _ as *mut core::ffi::c_void), interface);
+            } else {
+                core::ptr::null_mut()
+            };
             if (*interface).is_null() {
                 windows_core::HRESULT(-2147467262)
             } else {
@@ -1066,6 +1079,7 @@ impl<T: windows_core::RuntimeType + 'static> VectorChangedEventHandler<T> {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct VectorChangedEventHandler_Vtbl<T>
 where
     T: windows_core::RuntimeType + 'static,
@@ -1095,7 +1109,14 @@ impl<T: windows_core::RuntimeType + 'static, F: FnMut(windows_core::Ref<'_, IObs
             if iid.is_null() || interface.is_null() {
                 return windows_core::HRESULT(-2147467261);
             }
-            *interface = if *iid == <VectorChangedEventHandler<T> as windows_core::Interface>::IID || *iid == <windows_core::IUnknown as windows_core::Interface>::IID || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID { &mut (*this).vtable as *mut _ as _ } else { core::ptr::null_mut() };
+            *interface = if *iid == <VectorChangedEventHandler<T> as windows_core::Interface>::IID || *iid == <windows_core::IUnknown as windows_core::Interface>::IID || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID {
+                &mut (*this).vtable as *mut _ as _
+            } else if *iid == <windows_core::imp::IMarshal as windows_core::Interface>::IID {
+                (*this).count.add_ref();
+                return windows_core::imp::marshaler(core::mem::transmute(&mut (*this).vtable as *mut _ as *mut core::ffi::c_void), interface);
+            } else {
+                core::ptr::null_mut()
+            };
             if (*interface).is_null() {
                 windows_core::HRESULT(-2147467262)
             } else {

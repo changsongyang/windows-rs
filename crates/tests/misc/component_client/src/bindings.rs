@@ -38,6 +38,7 @@ impl Callback {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct Callback_Vtbl {
     base__: windows_core::IUnknown_Vtbl,
     Invoke: unsafe extern "system" fn(
@@ -76,6 +77,12 @@ impl<F: FnMut(i32) -> windows_core::Result<i32> + Send + 'static> CallbackBox<F>
                 || *iid == <windows_core::imp::IAgileObject as windows_core::Interface>::IID
             {
                 &mut (*this).vtable as *mut _ as _
+            } else if *iid == <windows_core::imp::IMarshal as windows_core::Interface>::IID {
+                (*this).count.add_ref();
+                return windows_core::imp::marshaler(
+                    core::mem::transmute(&mut (*this).vtable as *mut _ as *mut core::ffi::c_void),
+                    interface,
+                );
             } else {
                 core::ptr::null_mut()
             };
@@ -303,6 +310,7 @@ impl windows_core::RuntimeType for IClass {
         windows_core::imp::ConstBuffer::for_interface::<Self>();
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IClass_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub Property:
@@ -383,6 +391,7 @@ impl IThing_Vtbl {
     }
 }
 #[repr(C)]
+#[doc(hidden)]
 pub struct IThing_Vtbl {
     pub base__: windows_core::IInspectable_Vtbl,
     pub Method: unsafe extern "system" fn(*mut core::ffi::c_void) -> windows_core::HRESULT,
