@@ -45,12 +45,11 @@ impl File {
             .Attribute
             .extend(self.Attribute.values().flatten());
 
-        
         self.tables
             .GenericParam
             .extend(self.GenericParam.values().flatten());
 
-            self.tables
+        self.tables
             .InterfaceImpl
             .extend(self.InterfaceImpl.values().flatten());
 

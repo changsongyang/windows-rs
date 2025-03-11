@@ -1,3 +1,5 @@
+use reader::HasAttributes;
+use windows_bindgen as reader;
 use windows_ecma335::*;
 
 #[test]
@@ -32,24 +34,24 @@ fn test() {
             Type::U8,
         ],
         &Type::Void,
-        MethodCallAttributes(0),
+        MethodCallAttributes::HASTHIS,
     );
 
     let ctor = file.MemberRef(".ctor", signature, attribute);
 
     let value = file.AttributeValue(
         &[
-            Value::U32(1),
-            Value::U16(2),
-            Value::U16(3),
-            Value::U8(4),
-            Value::U8(5),
-            Value::U8(6),
-            Value::U8(7),
-            Value::U8(8),
-            Value::U8(9),
-            Value::U8(10),
-            Value::U8(11),
+            Value::U32(0xd095a8ca),
+            Value::U16(0x1103),
+            Value::U16(0x4ef5),
+            Value::U8(0x99),
+            Value::U8(0x8c),
+            Value::U8(0x62),
+            Value::U8(0x82),
+            Value::U8(0x15),
+            Value::U8(0x10),
+            Value::U8(0xef),
+            Value::U8(0x8f),
         ],
         &[],
     );
@@ -62,4 +64,21 @@ fn test() {
 
     let bytes = file.into_stream();
     std::fs::write("tests/attribute.winmd", bytes).unwrap();
+
+    let reader = reader::Reader::new(vec![reader::File::new(
+        std::fs::read("tests/attribute.winmd").unwrap(),
+    )
+    .unwrap()]);
+
+    let types: Vec<reader::Type> = reader.with_full_name("Namespace", "Name").collect();
+    assert_eq!(types.len(), 1);
+
+    let reader::Type::Interface(ref ty) = types[0] else {
+        panic!()
+    };
+
+    let attributes: Vec<_> = ty.def.attributes().collect();
+    assert_eq!(attributes.len(), 1);
+    let guid = ty.def.guid_attribute().unwrap();
+    assert_eq!(format!("{guid}"), "d095a8ca-1103-4ef5-998c-62821510ef8f");
 }

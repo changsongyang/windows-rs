@@ -20,8 +20,8 @@ impl Attribute {
         let mut values = self.blob(2);
         let prolog = values.read_u16();
         debug_assert_eq!(prolog, 1);
-        let this_and_gen_param_count = sig.read_usize();
-        debug_assert_eq!(this_and_gen_param_count, 32);
+        let flags = sig.read_u8();
+        debug_assert_eq!(flags, MethodCallAttributes::HASTHIS.0);
         let fixed_arg_count = sig.read_usize();
         let ret_type = sig.read_usize();
         debug_assert_eq!(ret_type, 1);

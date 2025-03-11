@@ -147,7 +147,7 @@ impl File {
             self.Type(ty, &mut buffer);
         }
 
-        self.tables.TypeSpec.push_pos(TypeSpec{
+        self.tables.TypeSpec.push_pos(TypeSpec {
             Signature: self.blobs.insert(&buffer),
         })
     }
@@ -229,7 +229,13 @@ impl File {
     }
 
     pub fn InterfaceImpl(&mut self, type_def: u32, interface: TypeDefOrRef) {
-        self.InterfaceImpl.entry(type_def).or_default().push(InterfaceImpl{ Class: type_def, Interface: interface });
+        self.InterfaceImpl
+            .entry(type_def)
+            .or_default()
+            .push(InterfaceImpl {
+                Class: type_def,
+                Interface: interface,
+            });
     }
 
     /// Encodes the `Type` in the buffer. Any required `TypeRef` rows will be added to the file, returning the blob offset.
@@ -292,7 +298,7 @@ impl File {
             Type::Generic(number) => {
                 buffer.push(ELEMENT_TYPE_VAR);
                 buffer.write_compressed(*number);
-            },
+            }
             Type::Type => self.Type(&Type::new("System", "Type"), buffer),
         }
     }
