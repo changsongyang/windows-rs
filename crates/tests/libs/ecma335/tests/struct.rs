@@ -1,4 +1,5 @@
 use windows_ecma335::*;
+use windows_bindgen as reader;
 
 #[test]
 fn test() {
@@ -23,4 +24,15 @@ fn test() {
 
     let bytes = file.into_stream();
     std::fs::write("tests/struct.winmd", bytes).unwrap();
+
+    let reader = reader::Reader::new(vec![reader::File::new(std::fs::read("tests/struct.winmd").unwrap()).unwrap()]);
+    let types: Vec<reader::Type> = reader.with_full_name("Namespace", "Name").collect();
+    assert_eq!(types.len(), 1);
+    let reader::Type::Struct(ref ty) = types[0] else { panic!() };
+    let fields: Vec<_> = ty.def.fields().collect();
+    assert_eq!(fields.len(), 2);
+    assert_eq!(fields[0].name(), "SomeGuid");
+    assert_eq!(fields[0].ty(None), reader::Type::GUID);    
+    assert_eq!(fields[1].name(), "SomeNum");
+    assert_eq!(fields[1].ty(None), reader::Type::I32);    
 }
