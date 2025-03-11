@@ -316,7 +316,7 @@ impl Type {
             }
             ELEMENT_TYPE_GENERICINST => {
                 let type_code = blob.read_u8();
-                
+
                 debug_assert!(matches!(
                     type_code,
                     ELEMENT_TYPE_VALUETYPE | ELEMENT_TYPE_CLASS
