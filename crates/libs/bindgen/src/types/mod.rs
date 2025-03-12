@@ -299,7 +299,7 @@ impl Type {
             return code;
         }
 
-        match code as u8 {
+        match code {
             ELEMENT_TYPE_VALUETYPE | ELEMENT_TYPE_CLASS => {
                 Self::from_ref(blob.decode(), enclosing, generics)
             }
