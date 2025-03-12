@@ -16,6 +16,10 @@ impl TypeDef {
     }
 
     pub fn name(&self) -> &'static str {
+        trim_tick(self.str(1))
+    }
+
+    pub fn raw_name(&self) -> &'static str {
         self.str(1)
     }
 

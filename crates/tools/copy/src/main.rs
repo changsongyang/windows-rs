@@ -89,7 +89,7 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
         w::TypeDefOrRef::default()
     };
 
-    let type_def = output.TypeDef(def.namespace(), def.name(), extends, flags);
+    let type_def = output.TypeDef(def.namespace(), def.raw_name(), extends, flags);
 
     for field in def.fields() {
         let flags = w::FieldAttributes(field.flags().0);
@@ -210,10 +210,10 @@ fn convert_type(input: &r::Type) -> w::Type<'static> {
         r::Type::Enum(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
         r::Type::Struct(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
         r::Type::Class(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
-        r::Type::Delegate(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
+        r::Type::Delegate(ty) => w::Type::new(ty.def.namespace(), ty.def.raw_name()),
         r::Type::Interface(ty) => w::Type::Name(w::TypeName {
             namespace: ty.def.namespace(),
-            name: ty.def.name(),
+            name: ty.def.raw_name(),
             generics: ty.generics.iter().map(|ty| convert_type(ty)).collect(),
         }),
         r::Type::Generic(name) => w::Type::Generic(name.sequence() as usize),
