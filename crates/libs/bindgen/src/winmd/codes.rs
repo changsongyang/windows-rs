@@ -91,6 +91,13 @@ impl MemberRefParent {
         }
     }
 
+    pub fn namespace(&self) -> &'static str {
+        match self {
+            Self::TypeDef(row) => row.namespace(),
+            Self::TypeRef(row) => row.namespace(),
+        }
+    }
+
     pub fn name(&self) -> &'static str {
         match self {
             Self::TypeDef(row) => row.name(),

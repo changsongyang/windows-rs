@@ -34,8 +34,7 @@ fn write_type(output: &mut w::File, ty: &r::Type) {
 
 fn write_attributes<R: r::HasAttributes>(output: &mut w::File, parent: w::HasAttribute, row: R) {
     for attribute in row.attributes() {
-        let r::AttributeType::MemberRef(ctor) = attribute.ty();
-        let r::MemberRefParent::TypeRef(ty) = ctor.parent();
+        let ty = attribute.ty().parent();
         let attribute_ref = w::MemberRefParent::TypeRef(output.TypeRef(ty.namespace(), ty.name()));
         let args = attribute.args();
 
@@ -219,7 +218,7 @@ fn convert_value(value: &r::Value) -> w::Value {
         r::Value::I64(value) => w::Value::I64(*value),
         r::Value::F32(value) => w::Value::F32(*value),
         r::Value::F64(value) => w::Value::F64(*value),
-        r::Value::Str(value) => w::Value::Str(*value),
+        r::Value::Str(value) => w::Value::Str(value),
         r::Value::TypeName(tn) => w::Value::TypeName(w::TypeName::new(tn.namespace(), tn.name())),
         rest => panic!("{rest:?}"),
     }

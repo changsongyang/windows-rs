@@ -7,7 +7,6 @@ members = [
     "crates/samples/components/*",
     "crates/targets/*",
     "crates/tests/misc/*",
-    "crates/tests/libs/*",
     "crates/tests/winrt/*",
     "crates/tests/libs/*",
     "crates/tools/*",
