@@ -16,7 +16,7 @@ fn main() {
     }
 
     let bytes = output.into_stream();
-    std::fs::write("copy.winmd", bytes).unwrap();
+    std::fs::write("target/copy.winmd", bytes).unwrap();
 
     println!("Finished in {:.2}s", time.elapsed().as_secs_f32());
 }
@@ -49,7 +49,8 @@ fn write_attributes<R: r::HasAttributes>(output: &mut w::File, parent: w::HasAtt
             })
             .collect();
 
-        let signature = output.MethodDefSig(&types, &w::Type::Void, w::MethodCallAttributes(0));
+        let signature =
+            output.MethodDefSig(&types, &w::Type::Void, w::MethodCallAttributes::HASTHIS);
         let ctor = output.MemberRef(".ctor", signature, attribute_ref);
 
         let fixed: Vec<w::Value> = args
@@ -110,8 +111,8 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
 
     let generics = def.generics();
 
-    for interface in def.interface_impls() {
-        let interface = convert_type(&interface.ty(&generics));
+    for def_interface in def.interface_impls() {
+        let interface = convert_type(&def_interface.ty(&generics));
 
         let interface = if let w::Type::Name(tn) = interface {
             if tn.generics.is_empty() {
@@ -123,7 +124,13 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
             panic!();
         };
 
-        output.InterfaceImpl(type_def, interface);
+        let interface_impl = output.InterfaceImpl(type_def, interface);
+
+        write_attributes(
+            output,
+            w::HasAttribute::InterfaceImpl(interface_impl),
+            def_interface,
+        );
     }
 
     for generic in def.generic_params() {

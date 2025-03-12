@@ -16,7 +16,6 @@ pub struct File {
     Constant: BTreeMap<HasConstant, Constant>,
     Attribute: BTreeMap<HasAttribute, Vec<Attribute>>,
     GenericParam: BTreeMap<TypeOrMethodDef, Vec<GenericParam>>,
-    InterfaceImpl: BTreeMap<u32, Vec<InterfaceImpl>>,
 }
 
 impl File {
@@ -228,14 +227,11 @@ impl File {
             });
     }
 
-    pub fn InterfaceImpl(&mut self, type_def: u32, interface: TypeDefOrRef) {
-        self.InterfaceImpl
-            .entry(type_def)
-            .or_default()
-            .push(InterfaceImpl {
-                Class: type_def,
-                Interface: interface,
-            });
+    pub fn InterfaceImpl(&mut self, type_def: u32, interface: TypeDefOrRef) -> u32 {
+        self.tables.InterfaceImpl.push_pos(InterfaceImpl {
+            Class: type_def,
+            Interface: interface,
+        })
     }
 
     /// Encodes the `Type` in the buffer. Any required `TypeRef` rows will be added to the file, returning the blob offset.

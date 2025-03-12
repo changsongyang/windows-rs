@@ -49,10 +49,6 @@ impl File {
             .GenericParam
             .extend(self.GenericParam.values().flatten());
 
-        self.tables
-            .InterfaceImpl
-            .extend(self.InterfaceImpl.values().flatten());
-
         let mut strings = self.strings.into_stream();
         let mut blobs = self.blobs.into_stream();
         let mut tables = self.tables.into_stream();

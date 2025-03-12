@@ -1,6 +1,6 @@
 macro_rules! code {
     ($name:ident($size:literal) $(($table:ident, $code:literal))+) => {
-        #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd)]
+        #[derive(Clone, Copy, Eq, PartialEq, Hash)]
         pub enum $name {
             $($table(u32),)*
         }
@@ -9,6 +9,17 @@ macro_rules! code {
                 match self {
                     $(Self::$table(row) => (row.overflowing_add(1).0) << $size | $code,)*
                 }
+            }
+        }
+        impl Ord for $name {
+            fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+                self.encode().cmp(&other.encode())
+            }
+        }
+        
+        impl PartialOrd for $name {
+            fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+                Some(self.cmp(other))
             }
         }
     };
