@@ -210,7 +210,11 @@ fn convert_type(input: &r::Type) -> w::Type<'static> {
         r::Type::Enum(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
         r::Type::Struct(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
         r::Type::Class(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
-        r::Type::Delegate(ty) => w::Type::new(ty.def.namespace(), ty.def.raw_name()),
+        r::Type::Delegate(ty) => w::Type::Name(w::TypeName {
+            namespace: ty.def.namespace(),
+            name: ty.def.raw_name(),
+            generics: ty.generics.iter().map(|ty| convert_type(ty)).collect(),
+        }),
         r::Type::Interface(ty) => w::Type::Name(w::TypeName {
             namespace: ty.def.namespace(),
             name: ty.def.raw_name(),
