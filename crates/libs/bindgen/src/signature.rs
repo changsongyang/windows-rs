@@ -4,6 +4,7 @@ use super::*;
 pub struct Signature {
     pub call_flags: MethodCallAttributes,
     pub return_type: Type,
+    pub return_param: Option<MethodParam>,
     pub params: Vec<Param>,
 }
 

@@ -106,7 +106,6 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
         }
     }
 
-    // TODO: may need to call write_attributes for methods/parameters/fields for Win32 metadata
     write_attributes(output, w::HasAttribute::TypeDef(type_def), def);
 
     let generics = def.generics();
@@ -160,7 +159,15 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
             let flags = w::MethodAttributes(method.flags().0);
             let impl_flags = w::MethodImplAttributes(method.impl_flags().0);
 
-            output.MethodDef(method.name(), signature_blob, flags, impl_flags);
+            let method_def = output.MethodDef(method.name(), signature_blob, flags, impl_flags);
+
+            if let Some(return_param) = signature.return_param {
+                output.Param(
+                    return_param.name(),
+                    return_param.sequence(),
+                    w::ParamAttributes(return_param.flags().0),
+                );
+            }
 
             for param in signature.params {
                 output.Param(
@@ -169,6 +176,8 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
                     w::ParamAttributes(param.def.flags().0),
                 );
             }
+
+            write_attributes(output, w::HasAttribute::MethodDef(method_def), method);
         }
     }
 }

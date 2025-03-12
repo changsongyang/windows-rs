@@ -12,7 +12,7 @@ impl TypeRef {
     }
 
     pub fn name(&self) -> &'static str {
-        trim_tick(self.str(1))
+        self.str(1)
     }
 
     pub fn namespace(&self) -> &'static str {
