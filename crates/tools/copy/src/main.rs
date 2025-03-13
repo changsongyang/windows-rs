@@ -207,7 +207,7 @@ fn convert_type(input: &r::Type) -> w::Type<'static> {
         r::Type::Object => w::Type::Object,
         r::Type::GUID => w::Type::new("System", "Guid"),
         // TODO: Type::HRESULT is ambiguous... since it can refer to either the WinRT or Win32 HRESULT
-        r::Type::HRESULT => w::Type::new("Windows.Foundation", "HResult"),
+        r::Type::HRESULT(tn) => w::Type::new(tn.namespace(), tn.name()),
         r::Type::Array(ty) => w::Type::Array(Box::new(convert_type(ty))),
         r::Type::ArrayRef(ty) => w::Type::ArrayRef(Box::new(convert_type(ty))),
         r::Type::ConstRef(ty) => w::Type::ConstRef(Box::new(convert_type(ty))),

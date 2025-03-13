@@ -169,7 +169,7 @@ impl CppMethod {
         if !def.has_attribute("CanReturnMultipleSuccessValuesAttribute") {
             match &signature.return_type {
                 Type::Void if is_retval => return_hint = ReturnHint::ReturnValue,
-                Type::HRESULT => {
+                Type::HRESULT(..) => {
                     if is_retval {
                         return_hint = ReturnHint::ResultValue
                     } else {
