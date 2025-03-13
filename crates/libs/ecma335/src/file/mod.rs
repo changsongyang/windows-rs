@@ -296,8 +296,8 @@ impl File {
             Type::ArrayFixed(ty, len) => {
                 buffer.push(ELEMENT_TYPE_ARRAY);
                 self.Type(ty, buffer);
-                buffer.write_compressed(0); // rank?
-                buffer.write_compressed(0); // count?
+                buffer.write_compressed(1);
+                buffer.write_compressed(1);
                 buffer.write_compressed(*len);
             }
 
