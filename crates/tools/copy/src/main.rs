@@ -4,10 +4,11 @@ use windows_ecma335 as w;
 fn main() {
     let time = std::time::Instant::now();
 
-    let input = r::Reader::new(vec![r::File::new(
-        std::fs::read("crates/libs/bindgen/default/Windows.winmd").unwrap(),
-    )
-    .unwrap()]);
+    let input = r::Reader::new(vec![
+        r::File::new(std::fs::read("crates/libs/bindgen/default/Windows.winmd").unwrap()).unwrap(),
+        r::File::new(std::fs::read("crates/libs/bindgen/default/Windows.Win32.winmd").unwrap()).unwrap(),
+        r::File::new(std::fs::read("crates/libs/bindgen/default/Windows.Wdk.winmd").unwrap()).unwrap(),
+    ]);
 
     let mut output = w::File::new("test");
 
@@ -23,11 +24,15 @@ fn main() {
 
 fn write_type(output: &mut w::File, ty: &r::Type) {
     match ty {
-        r::Type::Enum(ty) => write_def(output, ty.def, true),
-        r::Type::Struct(ty) => write_def(output, ty.def, true),
+        r::Type::Enum(ty) => write_def(output, ty.def, false),
+        r::Type::Struct(ty) => write_def(output, ty.def, false),
         r::Type::Delegate(ty) => write_def(output, ty.def, true),
         r::Type::Interface(ty) => write_def(output, ty.def, true),
         r::Type::Class(ty) => write_def(output, ty.def, false),
+
+        r::Type::CppEnum(ty) => write_def(output, ty.def, false),
+        //r::Type::CppStruct(ty) => write_def(output, ty.def, false),
+
         _ => {}
     }
 }
@@ -207,7 +212,9 @@ fn convert_type(input: &r::Type) -> w::Type<'static> {
         r::Type::ArrayRef(ty) => w::Type::ArrayRef(Box::new(convert_type(ty))),
         r::Type::ConstRef(ty) => w::Type::ConstRef(Box::new(convert_type(ty))),
         r::Type::Enum(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
+        r::Type::CppEnum(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
         r::Type::Struct(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
+        //r::Type::CppStruct(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
         r::Type::Class(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
         r::Type::Delegate(ty) => w::Type::Name(w::TypeName {
             namespace: ty.def.namespace(),
