@@ -65,7 +65,7 @@ impl MethodDef {
     #[track_caller]
     pub fn signature(&self, namespace: &str, generics: &[Type]) -> Signature {
         let mut blob = self.blob(4);
-        let call_flags = MethodCallAttributes(blob.read_usize() as u8);
+        let call_flags = MethodCallAttributes(blob.read_u8());
         let _param_count = blob.read_usize();
         let mut return_type = Type::from_blob(&mut blob, None, generics);
         let mut return_param = None;

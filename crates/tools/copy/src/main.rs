@@ -38,16 +38,15 @@ fn write_attributes<R: r::HasAttributes>(output: &mut w::File, parent: w::HasAtt
         let attribute_ref = w::MemberRefParent::TypeRef(output.TypeRef(ty.namespace(), ty.name()));
         let args = attribute.args();
 
-        let types: Vec<w::Type> = args
-            .iter()
-            .filter_map(|(name, value)| {
-                if name.is_empty() {
-                    Some(convert_value(value).ty())
-                } else {
-                    None
-                }
-            })
-            .collect();
+        let mut signature = attribute.ty().signature();
+        let _call_flags = signature.read_u8();
+        let param_count = signature.read_usize();
+        let mut types = vec![];
+        let _return_type = r::Type::from_blob(&mut signature, None, &[]);
+
+        for _ in 0..param_count {
+            types.push(convert_type(&r::Type::from_blob(&mut signature, None, &[])));
+        }
 
         let signature =
             output.MethodDefSig(&types, &w::Type::Void, w::MethodCallAttributes::HASTHIS);
@@ -221,6 +220,7 @@ fn convert_type(input: &r::Type) -> w::Type<'static> {
             generics: ty.generics.iter().map(|ty| convert_type(ty)).collect(),
         }),
         r::Type::Generic(name) => w::Type::Generic(name.sequence() as usize),
+        r::Type::Type => w::Type::new("System", "Type"),
         rest => panic!("{rest:?}"),
     }
 }

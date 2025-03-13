@@ -80,10 +80,10 @@ impl Reader {
                             kind: InterfaceKind::None,
                         }),
                         Category::Struct => {
-                            // Skip marker types representing API contracts.
-                            if def.has_attribute("ApiContractAttribute") {
-                                continue;
-                            }
+                            // // Skip marker types representing API contracts.
+                            // if def.has_attribute("ApiContractAttribute") {
+                            //     continue;
+                            // }
 
                             Type::Struct(Struct { def })
                         }

@@ -267,7 +267,9 @@ impl File {
             }
 
             Type::ConstRef(ty) => {
-                // TODO: need to write the "IsConst" modifier
+                buffer.write_compressed(ELEMENT_TYPE_CMOD_REQD as usize);
+                let pos = self.TypeRef("System.Runtime.CompilerServices", "IsConst");
+                buffer.write_compressed(TypeDefOrRef::TypeRef(pos).encode() as usize);
                 self.Type(ty, buffer);
             }
 
