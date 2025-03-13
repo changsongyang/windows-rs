@@ -173,10 +173,10 @@ impl Type {
             TypeName("Windows.Foundation", "HResult")
             | TypeName("Windows.Win32.Foundation", "HRESULT") => Remap::Type(Self::HRESULT),
 
-            // TypeName("Windows.Foundation", "EventRegistrationToken")
-            // | TypeName("Windows.Win32.System.WinRT", "EventRegistrationToken") => {
-            //     Remap::Type(Type::I64)
-            // }
+            TypeName("Windows.Foundation", "EventRegistrationToken")
+            | TypeName("Windows.Win32.System.WinRT", "EventRegistrationToken") => {
+                Remap::Type(Type::I64)
+            }
 
             TypeName("Windows.Win32.Graphics.Direct2D.Common", "D2D_MATRIX_3X2_F") => {
                 Remap::Name(TypeName("Windows.Foundation.Numerics", "Matrix3x2"))

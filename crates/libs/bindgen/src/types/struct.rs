@@ -15,6 +15,10 @@ impl Struct {
     }
 
     pub fn write(&self, writer: &Writer<'_>) -> TokenStream {
+        if self.def.has_attribute("ApiContractAttribute") {
+            return quote! {};
+        }
+
         let name = to_ident(self.def.name());
 
         let fields: Vec<_> = self
