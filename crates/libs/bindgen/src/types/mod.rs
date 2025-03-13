@@ -170,8 +170,8 @@ impl Type {
             TypeName("Windows.Win32.System.Com", "IUnknown") => Remap::Type(Self::IUnknown),
             TypeName("System", "Type") => Remap::Type(Self::Type),
 
-            // TypeName("Windows.Foundation", "HResult")
-            // | TypeName("Windows.Win32.Foundation", "HRESULT") => Remap::Type(Self::HRESULT(type_name)),
+            TypeName("Windows.Foundation", "HResult")
+            | TypeName("Windows.Win32.Foundation", "HRESULT") => Remap::Type(Self::HRESULT),
 
             // TypeName("Windows.Foundation", "EventRegistrationToken")
             // | TypeName("Windows.Win32.System.WinRT", "EventRegistrationToken") => {
@@ -309,8 +309,10 @@ impl Type {
                 .clone(),
             ELEMENT_TYPE_ARRAY => {
                 let kind = Self::from_blob(blob, enclosing, generics);
-                let _rank = blob.read_usize();
-                let _count = blob.read_usize();
+                let rank = blob.read_usize();
+                debug_assert_eq!(rank, 1);
+                let count = blob.read_usize();
+                debug_assert_eq!(count, 1);
                 let bounds = blob.read_usize();
                 Self::ArrayFixed(Box::new(kind), bounds)
             }

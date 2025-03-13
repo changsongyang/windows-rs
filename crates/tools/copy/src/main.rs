@@ -206,6 +206,7 @@ fn convert_type(input: &r::Type) -> w::Type<'static> {
         r::Type::String => w::Type::String,
         r::Type::Object => w::Type::Object,
         r::Type::GUID => w::Type::new("System", "Guid"),
+        r::Type::BOOL => w::Type::new("Windows.Win32.Foundation", "BOOL"),
         // TODO: Type::HRESULT is ambiguous... since it can refer to either the WinRT or Win32 HRESULT
         r::Type::HRESULT => w::Type::new("Windows.Foundation", "HResult"),
         r::Type::Array(ty) => w::Type::Array(Box::new(convert_type(ty))),
@@ -214,13 +215,14 @@ fn convert_type(input: &r::Type) -> w::Type<'static> {
         r::Type::Enum(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
         r::Type::CppEnum(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
         r::Type::Struct(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
-        //r::Type::CppStruct(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
+        r::Type::CppStruct(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
         r::Type::Class(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
         r::Type::Delegate(ty) => w::Type::Name(w::TypeName {
             namespace: ty.def.namespace(),
             name: ty.def.raw_name(),
             generics: ty.generics.iter().map(|ty| convert_type(ty)).collect(),
         }),
+        r::Type::CppDelegate(ty) => w::Type::new(ty.def.namespace(), ty.def.name()),
         r::Type::Interface(ty) => w::Type::Name(w::TypeName {
             namespace: ty.def.namespace(),
             name: ty.def.raw_name(),
@@ -228,6 +230,9 @@ fn convert_type(input: &r::Type) -> w::Type<'static> {
         }),
         r::Type::Generic(name) => w::Type::Generic(name.sequence() as usize),
         r::Type::Type => w::Type::new("System", "Type"),
+        r::Type::PtrMut(ty, pointers) => w::Type::PtrMut(Box::new(convert_type(ty)), *pointers),
+        r::Type::PtrConst(ty, pointers) => w::Type::PtrConst(Box::new(convert_type(ty)), *pointers),
+        r::Type::ArrayFixed(ty, len) => w::Type::ArrayFixed(Box::new(convert_type(ty)), *len),
         rest => panic!("{rest:?}"),
     }
 }

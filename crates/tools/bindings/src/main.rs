@@ -1,4 +1,4 @@
-se windows_bindgen::*;
+use windows_bindgen::*;
 
 fn main() {
     let time = std::time::Instant::now();

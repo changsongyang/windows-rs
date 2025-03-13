@@ -273,6 +273,34 @@ impl File {
                 self.Type(ty, buffer);
             }
 
+            Type::PtrMut(ty, pointers) => {
+                for _ in 0..*pointers {
+                    buffer.write_compressed(ELEMENT_TYPE_PTR as usize);
+                }
+
+                self.Type(ty, buffer);
+            }
+
+            Type::PtrConst(ty, pointers) => {
+                buffer.write_compressed(ELEMENT_TYPE_CMOD_REQD as usize);
+                let pos = self.TypeRef("System.Runtime.CompilerServices", "IsConst");
+                buffer.write_compressed(TypeDefOrRef::TypeRef(pos).encode() as usize);
+
+                for _ in 0..*pointers {
+                    buffer.write_compressed(ELEMENT_TYPE_PTR as usize);
+                }
+
+                self.Type(ty, buffer);
+            }
+
+            Type::ArrayFixed(ty, len) => {
+                buffer.push(ELEMENT_TYPE_ARRAY);
+                self.Type(ty, buffer);
+                buffer.write_compressed(0); // rank?
+                buffer.write_compressed(0); // count?
+                buffer.write_compressed(*len);
+            }
+
             Type::Name(ty) => {
                 if !ty.generics.is_empty() {
                     buffer.push(ELEMENT_TYPE_GENERICINST);

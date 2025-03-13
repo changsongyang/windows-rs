@@ -42,6 +42,10 @@ pub enum Type<'a> {
     ArrayRef(Box<Self>),
     ConstRef(Box<Self>),
     Generic(usize), // ELEMENT_TYPE_VAR value written as compressed usize
+
+    PtrMut(Box<Self>, usize),
+    PtrConst(Box<Self>, usize),
+    ArrayFixed(Box<Self>, usize),
 }
 
 impl<'a> Type<'a> {
