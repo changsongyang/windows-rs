@@ -75,7 +75,7 @@ pub enum Type {
     PWSTR,
     PCWSTR,
     GUID,
-    HRESULT(TypeName),
+    HRESULT,
     IUnknown,
     BSTR,
     BOOL,
@@ -421,7 +421,7 @@ impl Type {
                 let name = writer.write_core();
                 quote! { #name GUID }
             }
-            Self::HRESULT(..) => {
+            Self::HRESULT => {
                 let name = writer.write_core();
                 quote! { #name HRESULT }
             }
@@ -591,7 +591,7 @@ impl Type {
             Self::String => "string".to_string(),
             Self::Object => "cinterface(IInspectable)".to_string(),
             Self::GUID => "g16".to_string(),
-            Self::HRESULT(tn) => format!("struct({tn};i4)"),
+            Self::HRESULT => format!("struct(Windows.Foundation.HResult;i4)"),
             Self::Class(ty) => ty.runtime_signature(),
             Self::Delegate(ty) => ty.runtime_signature(),
             Self::Enum(ty) => ty.runtime_signature(),
@@ -722,7 +722,7 @@ impl Type {
             | Self::F64
             | Self::ISize
             | Self::USize
-            | Self::HRESULT(..)
+            | Self::HRESULT
             | Self::BOOL
             | Self::PtrConst(_, _)
             | Self::PtrMut(_, _) => true,
@@ -791,7 +791,7 @@ impl Type {
             Self::CppEnum(ty) => ty.def.underlying_type(),
             Self::Enum(ty) => ty.def.underlying_type(),
             Self::CppStruct(ty) => ty.def.underlying_type(),
-            Self::HRESULT(..) => Type::I32,
+            Self::HRESULT => Type::I32,
             Self::BOOL => Type::I32,
             _ => self.clone(),
         }
@@ -803,7 +803,7 @@ impl Type {
         }
 
         match self {
-            Self::HRESULT(..) => quote! { pub type HRESULT = i32; },
+            Self::HRESULT => quote! { pub type HRESULT = i32; },
             Self::BOOL => quote! { pub type BOOL = i32; },
 
             Self::PWSTR => quote! { pub type PWSTR = *mut u16; },
@@ -898,7 +898,7 @@ impl Type {
             Self::PWSTR => TypeName("", "PWSTR"),
             Self::PCWSTR => TypeName("", "PCWSTR"),
             Self::GUID => TypeName("", "GUID"),
-            Self::HRESULT(..) => TypeName("", "HRESULT"),
+            Self::HRESULT => TypeName("", "HRESULT"),
             Self::BOOL => TypeName("", "BOOL"),
             Self::IUnknown => TypeName("", "IUnknown"),
             Self::BSTR => TypeName("", "BSTR"),
@@ -917,7 +917,7 @@ impl Type {
                 | Self::PWSTR
                 | Self::PCWSTR
                 | Self::GUID
-                | Self::HRESULT(..)
+                | Self::HRESULT
                 | Self::BOOL
                 | Self::IUnknown
                 | Self::Object
@@ -998,7 +998,7 @@ impl Dependencies for Type {
 
             Self::IUnknown => {
                 Self::GUID.combine(dependencies);
-                Self::HRESULT(TypeName("Windows.Foundation", "HResult")).combine(dependencies);
+                Self::HRESULT.combine(dependencies);
             }
 
             Self::Object => {

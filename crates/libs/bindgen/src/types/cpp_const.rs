@@ -149,7 +149,7 @@ fn is_ansi_encoding(row: Field) -> bool {
 
 fn is_signed_error(ty: &Type) -> bool {
     match ty {
-        Type::HRESULT(..) => true,
+        Type::HRESULT => true,
         Type::CppStruct(ty) => ty.type_name() == TypeName::NTSTATUS,
         _ => false,
     }
