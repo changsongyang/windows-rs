@@ -2,17 +2,13 @@ use super::*;
 
 impl std::fmt::Debug for TypeDef<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "TypeDef({})", self.type_name())
+        write!(f, "TypeDef({}.{})", self.namespace(), self.name())
     }
 }
 
 impl TypeDef<'_> {
     pub fn flags(&self) -> TypeAttributes {
         TypeAttributes(self.usize(0) as u32)
-    }
-
-    pub fn type_name(&self) -> TypeName {
-        TypeName(self.namespace(), self.name())
     }
 
     pub fn name(&self) -> &str {
@@ -60,15 +56,5 @@ impl TypeDef<'_> {
 
     pub fn nested(&self) -> Option<NestedClass> {
         self.file().equal_range(0, self.index() + 1).next()
-    }
-
-    pub fn is_async(&self) -> bool {
-        matches!(
-            TypeName(self.namespace(), self.name()),
-            TypeName::IAsyncAction
-                | TypeName::IAsyncActionWithProgress
-                | TypeName::IAsyncOperation
-                | TypeName::IAsyncOperationWithProgress
-        )
     }
 }

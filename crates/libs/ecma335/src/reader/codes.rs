@@ -84,13 +84,6 @@ code! { MemberRefParent(3)
 }
 
 impl MemberRefParent<'_> {
-    pub fn type_name(&self) -> TypeName {
-        match self {
-            Self::TypeDef(row) => row.type_name(),
-            Self::TypeRef(row) => row.type_name(),
-        }
-    }
-
     pub fn namespace(&self) -> &str {
         match self {
             Self::TypeDef(row) => row.namespace(),
@@ -117,10 +110,18 @@ code! { TypeOrMethodDef(1)
 }
 
 impl TypeDefOrRef<'_> {
-    pub fn type_name(&self) -> TypeName {
+    pub fn namespace(&self) -> &str {
         match self {
-            Self::TypeDef(row) => row.type_name(),
-            Self::TypeRef(row) => row.type_name(),
+            Self::TypeDef(row) => row.namespace(),
+            Self::TypeRef(row) => row.namespace(),
+            rest => panic!("{rest:?}"),
+        }
+    }
+
+    pub fn name(&self) -> &str {
+        match self {
+            Self::TypeDef(row) => row.name(),
+            Self::TypeRef(row) => row.name(),
             rest => panic!("{rest:?}"),
         }
     }
