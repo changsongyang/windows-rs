@@ -39,21 +39,21 @@ impl<const LEN: usize> STREAM_HEADER<LEN> {
 
 impl File {
     pub fn into_stream(mut self) -> Vec<u8> {
-        self.tables.Constant.extend(self.Constant.values());
+        self.records.Constant.extend(self.Constant.values());
 
-        self.tables
+        self.records
             .Attribute
             .extend(self.Attribute.values().flatten());
 
-        self.tables
+        self.records
             .GenericParam
             .extend(self.GenericParam.values().flatten());
 
         let mut strings = self.strings.into_stream();
         let mut blobs = self.blobs.into_stream();
-        let mut tables = self.tables.into_stream();
+        let mut records = self.records.into_stream();
 
-        if [tables.len(), strings.len(), blobs.len()]
+        if [records.len(), strings.len(), blobs.len()]
             .iter()
             .any(|len| *len > u32::MAX as usize)
         {
@@ -62,7 +62,7 @@ impl File {
 
         unsafe {
             let mut guids = vec![0; 16]; // zero guid
-            let size_of_streams = tables.len() + guids.len() + strings.len() + blobs.len();
+            let size_of_streams = records.len() + guids.len() + strings.len() + blobs.len();
 
             let mut dos: IMAGE_DOS_HEADER = core::mem::zeroed();
             dos.e_magic = IMAGE_DOS_SIGNATURE;
@@ -170,7 +170,7 @@ impl File {
             let stream_offset = buffer.len() - metadata_offset + size_of_stream_headers;
 
             let tables_header =
-                TablesHeader::new(stream_offset as u32, tables.len() as u32, b"#~\0\0");
+                TablesHeader::new(stream_offset as u32, records.len() as u32, b"#~\0\0");
 
             let strings_header = StringsHeader::new(
                 tables_header.next_offset(),
@@ -195,7 +195,7 @@ impl File {
             buffer.write_header(&guids_header);
             buffer.write_header(&blobs_header);
 
-            buffer.append(&mut tables);
+            buffer.append(&mut records);
             buffer.append(&mut strings);
             buffer.append(&mut guids);
             buffer.append(&mut blobs);

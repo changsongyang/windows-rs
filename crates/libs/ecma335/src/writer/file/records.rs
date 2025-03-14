@@ -1,7 +1,7 @@
 use super::*;
 
 #[derive(Default)]
-pub struct Tables {
+pub struct Records {
     pub Assembly: Vec<Assembly>,
     pub AssemblyRef: Vec<AssemblyRef>,
     pub Attribute: Vec<Attribute>,
@@ -160,7 +160,7 @@ pub struct MemberRef {
     pub Signature: u32,
 }
 
-impl Tables {
+impl Records {
     pub fn into_stream(self) -> Vec<u8> {
         if [
             self.Assembly.len(),

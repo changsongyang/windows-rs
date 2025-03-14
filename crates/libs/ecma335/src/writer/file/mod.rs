@@ -1,8 +1,8 @@
 use super::*;
+use std::collections::*;
 mod into_stream;
 
-mod tables;
-use tables::*;
+mod records;
 
 mod blobs;
 use blobs::*;
@@ -10,21 +10,24 @@ use blobs::*;
 mod strings;
 use strings::*;
 
+mod helpers;
+use helpers::*;
+
 /// Represents an ECMA-335 file in memory so that it can be built incrementally.
 #[derive(Default)]
 pub struct File {
     strings: Strings,
     blobs: Blobs,
-    tables: Tables,
+    records: records::Records,
 
     // Indexes for fast lookup of preexisting rows.
     TypeRef: HashMap<String, HashMap<String, u32>>,
     AssemblyRef: HashMap<String, u32>,
 
-    // Staging for sorted rows before these tables can be written. BTreeMap is used rather than HashMap to allow reproducible builds.
-    Constant: BTreeMap<HasConstant, Constant>,
-    Attribute: BTreeMap<HasAttribute, Vec<Attribute>>,
-    GenericParam: BTreeMap<TypeOrMethodDef, Vec<GenericParam>>,
+    // Staging for sorted rows before these records can be written. BTreeMap is used rather than HashMap to allow reproducible builds.
+    Constant: BTreeMap<HasConstant, records::Constant>,
+    Attribute: BTreeMap<HasAttribute, Vec<records::Attribute>>,
+    GenericParam: BTreeMap<TypeOrMethodDef, Vec<records::GenericParam>>,
 }
 
 impl File {
@@ -33,7 +36,7 @@ impl File {
         let mut file = Self::default();
 
         // This assembly.
-        file.tables.Assembly.push(Assembly {
+        file.records.Assembly.push(records::Assembly {
             Name: file.strings.insert(name),
             HashAlgId: 0x00008004,
             MajorVersion: 0xFF,
@@ -45,7 +48,7 @@ impl File {
         });
 
         // This module.
-        file.tables.Module.push(Module {
+        file.records.Module.push(records::Module {
             Name: file.strings.insert(name),
             Mvid: 1,
             ..Default::default()
@@ -73,7 +76,7 @@ impl File {
         }
 
         let pos = if namespace == "System" {
-            self.tables.AssemblyRef.push_pos(AssemblyRef {
+            self.records.AssemblyRef.push_pos(records::AssemblyRef {
                 Name: self.strings.insert("mscorlib"),
                 MajorVersion: 4,
                 PublicKeyOrToken: self
@@ -82,7 +85,7 @@ impl File {
                 ..Default::default()
             })
         } else {
-            self.tables.AssemblyRef.push_pos(AssemblyRef {
+            self.records.AssemblyRef.push_pos(records::AssemblyRef {
                 Name: self.strings.insert(namespace),
                 MajorVersion: 0xFF,
                 MinorVersion: 0xFF,
@@ -105,13 +108,13 @@ impl File {
         extends: TypeDefOrRef,
         flags: TypeAttributes,
     ) -> u32 {
-        self.tables.TypeDef.push_pos(TypeDef {
+        self.records.TypeDef.push_pos(records::TypeDef {
             TypeName: self.strings.insert(name),
             TypeNamespace: self.strings.insert(namespace),
             Flags: flags,
             Extends: extends,
-            FieldList: self.tables.Field.len() as u32,
-            MethodList: self.tables.MethodDef.len() as u32,
+            FieldList: self.records.Field.len() as u32,
+            MethodList: self.records.MethodDef.len() as u32,
         })
     }
 
@@ -126,7 +129,7 @@ impl File {
         // The type may be local to the module but that requires more contextual information.
         let scope = ResolutionScope::AssemblyRef(self.AssemblyRef(namespace));
 
-        let pos = self.tables.TypeRef.push_pos(TypeRef {
+        let pos = self.records.TypeRef.push_pos(records::TypeRef {
             TypeName: self.strings.insert(name),
             TypeNamespace: self.strings.insert(namespace),
             ResolutionScope: scope,
@@ -155,14 +158,14 @@ impl File {
             self.Type(ty, &mut buffer);
         }
 
-        self.tables.TypeSpec.push_pos(TypeSpec {
+        self.records.TypeSpec.push_pos(records::TypeSpec {
             Signature: self.blobs.insert(&buffer),
         })
     }
 
     /// Adds a `Field` row to the file, returning the row offset.
     pub fn Field(&mut self, name: &str, signature: u32, flags: FieldAttributes) -> u32 {
-        self.tables.Field.push_pos(Field {
+        self.records.Field.push_pos(records::Field {
             Name: self.strings.insert(name),
             Flags: flags,
             Signature: signature,
@@ -177,18 +180,18 @@ impl File {
         flags: MethodAttributes,
         impl_flags: MethodImplAttributes,
     ) -> u32 {
-        self.tables.MethodDef.push_pos(MethodDef {
+        self.records.MethodDef.push_pos(records::MethodDef {
             RVA: 0,
             ImplFlags: impl_flags,
             Flags: flags,
             Name: self.strings.insert(name),
             Signature: signature,
-            ParamList: self.tables.Param.len() as u32,
+            ParamList: self.records.Param.len() as u32,
         })
     }
 
     pub fn MemberRef(&mut self, name: &str, signature: u32, parent: MemberRefParent) -> u32 {
-        self.tables.MemberRef.push_pos(MemberRef {
+        self.records.MemberRef.push_pos(records::MemberRef {
             Name: self.strings.insert(name),
             Signature: signature,
             Parent: parent,
@@ -197,7 +200,7 @@ impl File {
 
     /// Adds a `Param` row to the file, returning the row offset.
     pub fn Param(&mut self, name: &str, sequence: u16, flags: ParamAttributes) -> u32 {
-        self.tables.Param.push_pos(Param {
+        self.records.Param.push_pos(records::Param {
             Flags: flags,
             Sequence: sequence,
             Name: self.strings.insert(name),
@@ -206,7 +209,7 @@ impl File {
 
     /// Adds an `Attribute` row to the file. This is a sorted table so the row offset is not yet available.
     pub fn Attribute(&mut self, parent: HasAttribute, ty: AttributeType, value: u32) {
-        self.Attribute.entry(parent).or_default().push(Attribute {
+        self.Attribute.entry(parent).or_default().push(records::Attribute {
             Parent: parent,
             Type: ty,
             Value: value,
@@ -216,7 +219,7 @@ impl File {
     pub fn Constant(&mut self, parent: HasConstant, ty: u8, value: u32) {
         self.Constant.insert(
             parent,
-            Constant {
+            records::Constant {
                 Parent: parent,
                 Type: ty,
                 Value: value,
@@ -228,7 +231,7 @@ impl File {
         self.GenericParam
             .entry(owner)
             .or_default()
-            .push(GenericParam {
+            .push(records::GenericParam {
                 Name: self.strings.insert(name),
                 Number: number,
                 Owner: owner,
@@ -237,7 +240,7 @@ impl File {
     }
 
     pub fn InterfaceImpl(&mut self, type_def: u32, interface: TypeDefOrRef) -> u32 {
-        self.tables.InterfaceImpl.push_pos(InterfaceImpl {
+        self.records.InterfaceImpl.push_pos(records::InterfaceImpl {
             Class: type_def,
             Interface: interface,
         })

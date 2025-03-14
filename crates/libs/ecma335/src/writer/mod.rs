@@ -2,13 +2,11 @@ use super::*;
 
 mod codes;
 mod file;
-mod helpers;
 mod ty;
 mod type_name;
+mod tables;
 
-use helpers::*;
-use std::collections::*;
-
+pub use tables::*;
 pub use codes::*;
 pub use file::*;
 pub use ty::*;
