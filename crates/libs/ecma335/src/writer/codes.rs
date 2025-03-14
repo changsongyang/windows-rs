@@ -33,9 +33,9 @@ code! { TypeDefOrRef(2)
     (TypeSpec, 2)
 }
 
-impl Default for TypeDefOrRef {
-    fn default() -> Self {
-        // TODO: why is this "none"?
+impl TypeDefOrRef {
+    pub fn zeroed() -> Self {
+        // This results in an encoded value of zero.
         TypeDefOrRef::TypeDef(TypeDef(u32::MAX))
     }
 }

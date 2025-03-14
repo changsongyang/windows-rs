@@ -9,7 +9,7 @@ fn test() {
     let interface_def = file.TypeDef(
         "Namespace",
         "IName",
-        TypeDefOrRef::default(),
+        TypeDefOrRef::zeroed(),
         TypeAttributes::Public
             | TypeAttributes::Interface
             | TypeAttributes::Abstract

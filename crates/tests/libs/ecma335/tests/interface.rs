@@ -8,7 +8,7 @@ fn test() {
     file.TypeDef(
         "Namespace",
         "Name",
-        TypeDefOrRef::default(),
+        TypeDefOrRef::zeroed(),
         TypeAttributes::Public
             | TypeAttributes::Interface
             | TypeAttributes::Abstract

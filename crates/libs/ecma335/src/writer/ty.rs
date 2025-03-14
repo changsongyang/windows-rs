@@ -21,14 +21,14 @@ pub enum Type<'a> {
     Object,
     Type,
     Name(TypeName<'a>),
-    Array(Box<Self>),
-    ArrayRef(Box<Self>),
-    ConstRef(Box<Self>),
-    Generic(usize), // ELEMENT_TYPE_VAR value written as compressed usize
+    Array(Box<Self>),    // ELEMENT_TYPE_SZARRAY
+    ArrayRef(Box<Self>), // ELEMENT_TYPE_BYREF, ELEMENT_TYPE_SZARRAY
+    ConstRef(Box<Self>), // ELEMENT_TYPE_CMOD_REQD (IsConst)
+    Generic(usize),      // ELEMENT_TYPE_VAR
 
-    PtrMut(Box<Self>, usize),
-    PtrConst(Box<Self>, usize),
-    ArrayFixed(Box<Self>, usize),
+    PtrMut(Box<Self>, usize),     // ELEMENT_TYPE_PTR
+    PtrConst(Box<Self>, usize),   // ELEMENT_TYPE_CMOD_REQD (IsConst), ELEMENT_TYPE_PTR
+    ArrayFixed(Box<Self>, usize), // ELEMENT_TYPE_ARRAY
 }
 
 impl<'a> Type<'a> {
