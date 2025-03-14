@@ -126,3 +126,10 @@ impl TypeDefOrRef<'_> {
         }
     }
 }
+
+code! { ResolutionScope(2)
+    (Module, 0)
+    (ModuleRef, 1)
+    (AssemblyRef, 2)
+    (TypeRef, 3)
+}

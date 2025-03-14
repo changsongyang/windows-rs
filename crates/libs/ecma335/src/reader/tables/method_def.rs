@@ -7,16 +7,28 @@ impl std::fmt::Debug for MethodDef<'_> {
 }
 
 impl MethodDef<'_> {
+    pub fn rva(&self) -> usize {
+        self.usize(0)
+    }
+
     pub fn impl_flags(&self) -> MethodImplAttributes {
-        MethodImplAttributes(self.usize(1) as u16)
+        MethodImplAttributes(self.usize(1).try_into().unwrap())
     }
 
     pub fn flags(&self) -> MethodAttributes {
-        MethodAttributes(self.usize(2) as u16)
+        MethodAttributes(self.usize(2).try_into().unwrap())
     }
 
     pub fn name(&self) -> &str {
         self.str(3)
+    }
+
+    pub fn signature(&self) -> Blob {
+        self.blob(4)
+    }
+
+    pub fn params(&self) -> RowIterator<MethodParam> {
+        self.list(5)
     }
 
     // pub fn import_name(&'a self) -> Option<&'a str> {
@@ -30,9 +42,6 @@ impl MethodDef<'_> {
     //     })
     // }
 
-    pub fn params(&self) -> RowIterator<MethodParam> {
-        self.list(5)
-    }
 
     pub fn parent(&self) -> MemberRefParent {
         MemberRefParent::TypeDef(self.file().parent(5, *self))

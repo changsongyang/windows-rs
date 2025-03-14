@@ -5,3 +5,9 @@ impl std::fmt::Debug for TypeSpec<'_> {
         f.debug_tuple("TypeSpec").field(&self.0).finish()
     }
 }
+
+impl TypeSpec<'_> {
+    pub fn signature(&self) -> Blob {
+        self.blob(0)
+    }
+}

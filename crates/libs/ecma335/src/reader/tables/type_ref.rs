@@ -7,8 +7,12 @@ impl std::fmt::Debug for TypeRef<'_> {
 }
 
 impl TypeRef<'_> {
+    pub fn scope(&self) -> ResolutionScope {
+        self.decode(0)
+    }
+
     pub fn name(&self) -> &str {
-        trim_tick(self.str(1))
+        self.str(1)
     }
 
     pub fn namespace(&self) -> &str {

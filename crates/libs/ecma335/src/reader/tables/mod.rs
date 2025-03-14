@@ -15,6 +15,8 @@ mod nested_class;
 mod type_def;
 mod type_ref;
 mod type_spec;
+mod module;
+mod assembly_ref;
 
 macro_rules! tables {
     ($(($name:ident, $table:literal))+) => {
@@ -50,6 +52,8 @@ tables! {
     (TypeDef, 8)
     (TypeRef, 9)
     (TypeSpec, 10)
+    (Module, 0)
+    (AssemblyRef, 0x23)
 }
 
 fn trim_tick(name: &str) -> &str {

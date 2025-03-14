@@ -8,14 +8,10 @@ impl std::fmt::Debug for TypeDef<'_> {
 
 impl TypeDef<'_> {
     pub fn flags(&self) -> TypeAttributes {
-        TypeAttributes(self.usize(0) as u32)
+        TypeAttributes(self.usize(0).try_into().unwrap())
     }
 
     pub fn name(&self) -> &str {
-        trim_tick(self.str(1))
-    }
-
-    pub fn raw_name(&self) -> &str {
         self.str(1)
     }
 
@@ -24,21 +20,19 @@ impl TypeDef<'_> {
     }
 
     pub fn extends(&self) -> Option<TypeDefOrRef> {
-        let extends = self.usize(3);
-
-        if extends == 0 {
+        if self.usize(3) == 0 {
             return None;
         }
 
-        Some(TypeDefOrRef::decode(self.file(), extends))
-    }
-
-    pub fn methods(&self) -> RowIterator<MethodDef> {
-        self.list(5)
+        Some(self.decode(3))
     }
 
     pub fn fields(&self) -> RowIterator<Field> {
         self.list(4)
+    }
+    
+    pub fn methods(&self) -> RowIterator<MethodDef> {
+        self.list(5)
     }
 
     pub fn generic_params(&self) -> RowIterator<GenericParam> {
