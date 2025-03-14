@@ -64,7 +64,7 @@ impl File {
     }
 
     /// Adds an `AssemblyRef` row representing the given namespace to the file, returning the row offset.
-    fn AssemblyRef(&mut self, namespace: &str) -> u32 {
+    fn AssemblyRef(&mut self, namespace: &str) -> AssemblyRef {
         // This generates a synthetic `AssemblyRef` for every root namespace, but the alternative requires a
         // lot more contextual information which we can hopefully avoid for now.
         let namespace = namespace
@@ -72,7 +72,7 @@ impl File {
             .map_or(namespace, |(prefix, _)| prefix);
 
         if let Some(pos) = self.AssemblyRef.get(namespace) {
-            return *pos;
+            return AssemblyRef(*pos);
         }
 
         let pos = if namespace == "System" {
@@ -97,7 +97,7 @@ impl File {
         };
 
         self.AssemblyRef.insert(namespace.to_string(), pos);
-        pos
+        AssemblyRef(pos)
     }
 
     /// Adds a `TypeDef` row to the file, returning the row offset.
@@ -107,22 +107,22 @@ impl File {
         name: &str,
         extends: TypeDefOrRef,
         flags: TypeAttributes,
-    ) -> u32 {
-        self.records.TypeDef.push_pos(records::TypeDef {
+    ) -> TypeDef {
+        TypeDef(self.records.TypeDef.push_pos(records::TypeDef {
             TypeName: self.strings.insert(name),
             TypeNamespace: self.strings.insert(namespace),
             Flags: flags,
             Extends: extends,
             FieldList: self.records.Field.len() as u32,
             MethodList: self.records.MethodDef.len() as u32,
-        })
+        }))
     }
 
     /// Adds a `TypeRef` row to the file, returning the row offset.
-    pub fn TypeRef(&mut self, namespace: &str, name: &str) -> u32 {
+    pub fn TypeRef(&mut self, namespace: &str, name: &str) -> TypeRef {
         if let Some(key) = self.TypeRef.get(namespace) {
             if let Some(pos) = key.get(name) {
-                return *pos;
+                return TypeRef(*pos);
             }
         }
 
@@ -140,10 +140,10 @@ impl File {
             .or_default()
             .insert(name.to_string(), pos);
 
-        pos
+        TypeRef(pos)
     }
 
-    pub fn TypeSpec(&mut self, tn: &TypeName) -> u32 {
+    pub fn TypeSpec(&mut self, tn: &TypeName) -> TypeSpec {
         debug_assert!(!tn.generics.is_empty());
 
         let type_ref = self.TypeRef(tn.namespace, tn.name);
@@ -158,71 +158,79 @@ impl File {
             self.Type(ty, &mut buffer);
         }
 
-        self.records.TypeSpec.push_pos(records::TypeSpec {
+        TypeSpec(self.records.TypeSpec.push_pos(records::TypeSpec {
             Signature: self.blobs.insert(&buffer),
-        })
+        }))
     }
 
     /// Adds a `Field` row to the file, returning the row offset.
-    pub fn Field(&mut self, name: &str, signature: u32, flags: FieldAttributes) -> u32 {
-        self.records.Field.push_pos(records::Field {
+    pub fn Field(&mut self, name: &str, signature: FieldSig, flags: FieldAttributes) -> Field {
+        Field(self.records.Field.push_pos(records::Field {
             Name: self.strings.insert(name),
             Flags: flags,
-            Signature: signature,
-        })
+            Signature: signature.0,
+        }))
     }
 
     /// Adds a `MethodDef` row to the file, returning the row offset.
     pub fn MethodDef(
         &mut self,
         name: &str,
-        signature: u32,
+        signature: MethodDefSig,
         flags: MethodAttributes,
         impl_flags: MethodImplAttributes,
-    ) -> u32 {
-        self.records.MethodDef.push_pos(records::MethodDef {
+    ) -> MethodDef {
+        MethodDef(self.records.MethodDef.push_pos(records::MethodDef {
             RVA: 0,
             ImplFlags: impl_flags,
             Flags: flags,
             Name: self.strings.insert(name),
-            Signature: signature,
+            Signature: signature.0,
             ParamList: self.records.Param.len() as u32,
-        })
+        }))
     }
 
-    pub fn MemberRef(&mut self, name: &str, signature: u32, parent: MemberRefParent) -> u32 {
-        self.records.MemberRef.push_pos(records::MemberRef {
+    pub fn MemberRef(
+        &mut self,
+        name: &str,
+        signature: MethodDefSig,
+        parent: MemberRefParent,
+    ) -> MemberRef {
+        MemberRef(self.records.MemberRef.push_pos(records::MemberRef {
             Name: self.strings.insert(name),
-            Signature: signature,
+            Signature: signature.0,
             Parent: parent,
-        })
+        }))
     }
 
     /// Adds a `Param` row to the file, returning the row offset.
-    pub fn Param(&mut self, name: &str, sequence: u16, flags: ParamAttributes) -> u32 {
-        self.records.Param.push_pos(records::Param {
+    pub fn Param(&mut self, name: &str, sequence: u16, flags: ParamAttributes) -> Param {
+        Param(self.records.Param.push_pos(records::Param {
             Flags: flags,
             Sequence: sequence,
             Name: self.strings.insert(name),
-        })
+        }))
     }
 
     /// Adds an `Attribute` row to the file. This is a sorted table so the row offset is not yet available.
-    pub fn Attribute(&mut self, parent: HasAttribute, ty: AttributeType, value: u32) {
-        self.Attribute.entry(parent).or_default().push(records::Attribute {
-            Parent: parent,
-            Type: ty,
-            Value: value,
-        });
+    pub fn Attribute(&mut self, parent: HasAttribute, ty: AttributeType, value: AttributeValue) {
+        self.Attribute
+            .entry(parent)
+            .or_default()
+            .push(records::Attribute {
+                Parent: parent,
+                Type: ty,
+                Value: value.0,
+            });
     }
 
-    pub fn Constant(&mut self, parent: HasConstant, ty: u8, value: u32) {
+    pub fn Constant(&mut self, parent: HasConstant, ty: u8, value: ConstantValue) {
         self.Constant.insert(
             parent,
             records::Constant {
                 Parent: parent,
                 Type: ty,
-                Value: value,
+                Value: value.0,
             },
         );
     }
@@ -239,11 +247,11 @@ impl File {
             });
     }
 
-    pub fn InterfaceImpl(&mut self, type_def: u32, interface: TypeDefOrRef) -> u32 {
-        self.records.InterfaceImpl.push_pos(records::InterfaceImpl {
-            Class: type_def,
+    pub fn InterfaceImpl(&mut self, type_def: TypeDef, interface: TypeDefOrRef) -> InterfaceImpl {
+        InterfaceImpl(self.records.InterfaceImpl.push_pos(records::InterfaceImpl {
+            Class: type_def.0,
             Interface: interface,
-        })
+        }))
     }
 
     /// Encodes the `Type` in the buffer. Any required `TypeRef` rows will be added to the file, returning the blob offset.
@@ -342,10 +350,10 @@ impl File {
     }
 
     /// Writes the `Type` into a `FileSig` buffer and stores it in the file, returning the blob offset.
-    pub fn FieldSig(&mut self, ty: &Type) -> u32 {
+    pub fn FieldSig(&mut self, ty: &Type) -> FieldSig {
         let mut buffer = vec![0x6]; // FIELD
         self.Type(ty, &mut buffer);
-        self.blobs.insert(&buffer)
+        FieldSig(self.blobs.insert(&buffer))
     }
 
     /// Writes the method signature into a `MethodDefSig` buffer and stores it in the file, returning the blob offset.
@@ -354,7 +362,7 @@ impl File {
         params: &[Type],
         return_type: &Type,
         flags: MethodCallAttributes,
-    ) -> u32 {
+    ) -> MethodDefSig {
         let mut buffer = vec![flags.0];
         buffer.write_compressed(params.len());
         self.Type(return_type, &mut buffer);
@@ -363,16 +371,16 @@ impl File {
             self.Type(ty, &mut buffer);
         }
 
-        self.blobs.insert(&buffer)
+        MethodDefSig(self.blobs.insert(&buffer))
     }
 
-    pub fn ConstantValue(&mut self, value: &Value) -> u32 {
+    pub fn ConstantValue(&mut self, value: &Value) -> ConstantValue {
         let mut buffer = vec![];
         buffer.write_value(value);
-        self.blobs.insert(&buffer)
+        ConstantValue(self.blobs.insert(&buffer))
     }
 
-    pub fn AttributeValue(&mut self, fixed: &[Value], named: &[(&str, Value)]) -> u32 {
+    pub fn AttributeValue(&mut self, fixed: &[Value], named: &[(&str, Value)]) -> AttributeValue {
         let mut buffer = vec![];
         buffer.write_u16(1); // prolog
 
@@ -390,6 +398,6 @@ impl File {
             buffer.write_value(value);
         }
 
-        self.blobs.insert(&buffer)
+        AttributeValue(self.blobs.insert(&buffer))
     }
 }

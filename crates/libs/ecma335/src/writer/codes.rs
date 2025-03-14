@@ -1,13 +1,15 @@
+use super::*;
+
 macro_rules! code {
     ($name:ident($size:literal) $(($table:ident, $code:literal))+) => {
         #[derive(Clone, Copy, Eq, PartialEq, Hash)]
         pub enum $name {
-            $($table(u32),)*
+            $($table($table),)*
         }
         impl $name {
             pub fn encode(&self) -> u32 {
                 match self {
-                    $(Self::$table(row) => (row.overflowing_add(1).0) << $size | $code,)*
+                    $(Self::$table(row) => (row.0.overflowing_add(1).0) << $size | $code,)*
                 }
             }
         }
@@ -34,7 +36,7 @@ code! { TypeDefOrRef(2)
 impl Default for TypeDefOrRef {
     fn default() -> Self {
         // TODO: why is this "none"?
-        TypeDefOrRef::TypeDef(u32::MAX)
+        TypeDefOrRef::TypeDef(TypeDef(u32::MAX))
     }
 }
 

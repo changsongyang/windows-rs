@@ -1,13 +1,13 @@
-macro_rules! tables {
+macro_rules! identifiers {
     ($($name:ident)+) => {
         $(
         #[derive(Copy, Clone, Hash, PartialEq, Eq, Ord, PartialOrd)]
-        pub struct $name(u32);
+        pub struct $name(pub(crate) u32);
     )*
     };
 }
 
-tables! {
+identifiers! {
     Attribute
     ClassLayout
     Constant
@@ -23,4 +23,12 @@ tables! {
     TypeDef
     TypeRef
     TypeSpec
+    Module
+    AssemblyRef
+    Param
+
+    FieldSig
+    MethodDefSig
+    AttributeValue
+    ConstantValue
 }

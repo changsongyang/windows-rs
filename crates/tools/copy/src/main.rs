@@ -1,5 +1,5 @@
 use windows_bindgen as r;
-use windows_ecma335::{*, writer as w};
+use windows_ecma335::{writer as w, *};
 
 fn main() {
     let time = std::time::Instant::now();
@@ -54,8 +54,7 @@ fn write_attributes<R: r::HasAttributes>(output: &mut w::File, parent: w::HasAtt
             types.push(convert_type(&r::Type::from_blob(&mut signature, None, &[])));
         }
 
-        let signature =
-            output.MethodDefSig(&types, &w::Type::Void, MethodCallAttributes::HASTHIS);
+        let signature = output.MethodDefSig(&types, &w::Type::Void, MethodCallAttributes::HASTHIS);
         let ctor = output.MemberRef(".ctor", signature, attribute_ref);
 
         let fixed: Vec<Value> = args
