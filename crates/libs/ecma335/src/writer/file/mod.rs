@@ -1,6 +1,15 @@
 use super::*;
 mod into_stream;
 
+mod tables;
+use tables::*;
+
+mod blobs;
+use blobs::*;
+
+mod strings;
+use strings::*;
+
 /// Represents an ECMA-335 file in memory so that it can be built incrementally.
 #[derive(Default)]
 pub struct File {
