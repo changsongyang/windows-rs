@@ -5,3 +5,13 @@ impl std::fmt::Debug for InterfaceImpl<'_> {
         f.debug_tuple("InterfaceImpl").field(&self.0).finish()
     }
 }
+
+impl InterfaceImpl<'_> {
+    pub fn class(&self) -> TypeDef {
+        TypeDef(Row::new(self.file(), self.usize(0)))
+    }
+
+    pub fn interface(&self) -> TypeDefOrRef {
+        self.decode(1)
+    }
+}

@@ -8,7 +8,7 @@ impl std::fmt::Debug for Field<'_> {
 
 impl Field<'_> {
     pub fn flags(&self) -> FieldAttributes {
-        FieldAttributes(self.usize(0) as u16)
+        FieldAttributes(self.usize(0).try_into().unwrap())
     }
 
     pub fn name(&self) -> &str {
@@ -19,5 +19,9 @@ impl Field<'_> {
         self.file()
             .equal_range(1, HasConstant::Field(*self).encode())
             .next()
+    }
+
+    pub fn signature(&self) -> Blob {
+        self.blob(2)
     }
 }

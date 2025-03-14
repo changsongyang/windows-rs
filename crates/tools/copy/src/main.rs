@@ -90,7 +90,7 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
     let extends = if let Some(extends) = def.extends() {
         w::TypeDefOrRef::TypeRef(output.TypeRef(extends.namespace(), extends.name()))
     } else {
-        w::TypeDefOrRef::default()
+        w::TypeDefOrRef::zeroed()
     };
 
     let type_def = output.TypeDef(def.namespace(), def.raw_name(), extends, flags);

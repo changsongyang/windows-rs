@@ -10,4 +10,12 @@ impl MemberRef<'_> {
     pub fn parent(&self) -> MemberRefParent {
         self.decode(0)
     }
+
+    pub fn name(&self) -> &str {
+        self.str(1)
+    }
+
+    pub fn signature(&self) -> Blob {
+        self.blob(2)
+    }
 }

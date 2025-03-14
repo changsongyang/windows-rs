@@ -70,6 +70,17 @@ code! { HasAttribute(5)
     (GenericParam, 19)
 }
 
+impl HasAttribute {
+    pub fn name(&self) -> &'static str {
+        match self {
+            Self::TypeDef(def) => def.name(),
+            Self::Field(def) => def.name(),
+            Self::MethodParam(def) => def.name(),
+            rest => panic!("{rest:?}"),
+        }
+    }
+}
+
 code! { HasConstant(2)
     (Field, 0)
 }

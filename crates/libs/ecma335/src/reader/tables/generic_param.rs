@@ -7,12 +7,12 @@ impl std::fmt::Debug for GenericParam<'_> {
 }
 
 impl GenericParam<'_> {
-    pub fn sequence(&self) -> u16 {
-        self.usize(0) as u16
+    pub fn sequence(&self) -> usize {
+        self.usize(0)
     }
 
-    pub fn flags(&self) -> u16 {
-        self.usize(1) as u16
+    pub fn flags(&self) -> usize {
+        self.usize(1)
     }
 
     pub fn name(&self) -> &str {

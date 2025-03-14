@@ -7,6 +7,10 @@ impl std::fmt::Debug for Attribute {
 }
 
 impl Attribute {
+    pub fn parent(&self) -> HasAttribute {
+        self.decode(0)
+    }
+
     pub fn ty(&self) -> AttributeType {
         self.decode(1)
     }
