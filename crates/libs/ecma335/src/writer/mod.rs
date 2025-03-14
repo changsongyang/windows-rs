@@ -1,5 +1,6 @@
+use super::*;
+
 mod attributes;
-mod bindings;
 mod blobs;
 mod codes;
 mod file;
@@ -9,7 +10,6 @@ mod tables;
 mod ty;
 mod value;
 
-use bindings::*;
 use blobs::*;
 use helpers::*;
 use std::collections::*;

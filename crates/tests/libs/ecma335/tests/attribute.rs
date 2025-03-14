@@ -1,6 +1,6 @@
 use reader::HasAttributes;
 use windows_bindgen as reader;
-use windows_ecma335::*;
+use windows_ecma335::writer::*;
 
 #[test]
 fn test() {
