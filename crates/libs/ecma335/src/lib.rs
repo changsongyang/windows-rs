@@ -3,16 +3,12 @@
 
 use std::cmp::Ordering;
 
-pub mod reader;
-pub mod writer;
 mod attributes;
-mod element_type;
+pub mod reader;
 mod value;
+pub mod writer;
 
-pub use value::*;
-pub use element_type::*;
 pub use attributes::*;
+pub use value::*;
 mod bindings;
 use bindings::*;
-
-// TODO: maybe ecma335 shares the File struct only and bindgen build its own Reader/Type cache and ecma335 can have its own Reader/Type cache

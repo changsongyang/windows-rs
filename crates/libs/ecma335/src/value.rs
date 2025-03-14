@@ -18,20 +18,20 @@ pub enum Value {
 }
 
 impl Value {
-    pub fn ty(&self) -> ElementType {
+    pub fn ty(&self) -> u8 {
         match self {
-            Self::Bool(..) => ElementType::Bool,
-            Self::U8(..) => ElementType::U8,
-            Self::I8(..) => ElementType::I8,
-            Self::U16(..) => ElementType::U16,
-            Self::I16(..) => ElementType::I16,
-            Self::U32(..) => ElementType::U32,
-            Self::I32(..) => ElementType::I32,
-            Self::U64(..) => ElementType::U64,
-            Self::I64(..) => ElementType::I64,
-            Self::F32(..) => ElementType::F32,
-            Self::F64(..) => ElementType::F64,
-            Self::Str(..) => ElementType::String,
+            Self::Bool(..) => ELEMENT_TYPE_BOOLEAN,
+            Self::U8(..) => ELEMENT_TYPE_U1,
+            Self::I8(..) => ELEMENT_TYPE_I1,
+            Self::U16(..) => ELEMENT_TYPE_U2,
+            Self::I16(..) => ELEMENT_TYPE_I2,
+            Self::U32(..) => ELEMENT_TYPE_U4,
+            Self::I32(..) => ELEMENT_TYPE_I4,
+            Self::U64(..) => ELEMENT_TYPE_U8,
+            Self::I64(..) => ELEMENT_TYPE_I8,
+            Self::F32(..) => ELEMENT_TYPE_R4,
+            Self::F64(..) => ELEMENT_TYPE_R8,
+            Self::Str(..) => ELEMENT_TYPE_STRING,
             rest => panic!("{rest:?}"),
         }
     }
