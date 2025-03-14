@@ -5,7 +5,13 @@ use std::cmp::Ordering;
 
 pub mod reader;
 pub mod writer;
+mod attributes;
+mod element_type;
+mod value;
 
+pub use value::*;
+pub use element_type::*;
+pub use attributes::*;
 mod bindings;
 use bindings::*;
 

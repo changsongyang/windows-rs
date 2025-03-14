@@ -16,7 +16,7 @@ macro_rules! code {
                 self.encode().cmp(&other.encode())
             }
         }
-        
+
         impl PartialOrd for $name {
             fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
                 Some(self.cmp(other))

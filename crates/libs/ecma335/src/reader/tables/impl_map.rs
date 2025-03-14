@@ -6,16 +6,16 @@ impl std::fmt::Debug for ImplMap<'_> {
     }
 }
 
-impl<'a> ImplMap<'a> {
+impl ImplMap<'_> {
     pub fn flags(&self) -> PInvokeAttributes {
         PInvokeAttributes(self.usize(0))
     }
 
-    pub fn scope(&'a self) -> ModuleRef<'a> {
+    pub fn scope(&self) -> ModuleRef {
         ModuleRef(self.row(3))
     }
 
-    pub fn import_name(&'a self) -> &'a str {
+    pub fn import_name(&self) -> &str {
         self.str(2)
     }
 }

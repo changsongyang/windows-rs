@@ -6,8 +6,8 @@ impl std::fmt::Debug for MemberRef<'_> {
     }
 }
 
-impl<'a> MemberRef<'a> {
-    pub fn parent(&'a self) -> MemberRefParent<'a> {
+impl MemberRef<'_> {
+    pub fn parent(&self) -> MemberRefParent {
         self.decode(0)
     }
 }

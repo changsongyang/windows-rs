@@ -1,4 +1,5 @@
 use windows_bindgen as r;
+use windows_ecma335::*;
 use windows_ecma335::writer as w;
 
 fn main() {
@@ -6,8 +7,10 @@ fn main() {
 
     let input = r::Reader::new(vec![
         r::File::new(std::fs::read("crates/libs/bindgen/default/Windows.winmd").unwrap()).unwrap(),
-        r::File::new(std::fs::read("crates/libs/bindgen/default/Windows.Win32.winmd").unwrap()).unwrap(),
-        r::File::new(std::fs::read("crates/libs/bindgen/default/Windows.Wdk.winmd").unwrap()).unwrap(),
+        r::File::new(std::fs::read("crates/libs/bindgen/default/Windows.Win32.winmd").unwrap())
+            .unwrap(),
+        r::File::new(std::fs::read("crates/libs/bindgen/default/Windows.Wdk.winmd").unwrap())
+            .unwrap(),
     ]);
 
     let mut output = w::File::new("test");
@@ -32,7 +35,6 @@ fn write_type(output: &mut w::File, ty: &r::Type) {
 
         r::Type::CppEnum(ty) => write_def(output, ty.def, false),
         //r::Type::CppStruct(ty) => write_def(output, ty.def, false),
-
         _ => {}
     }
 }
@@ -54,10 +56,10 @@ fn write_attributes<R: r::HasAttributes>(output: &mut w::File, parent: w::HasAtt
         }
 
         let signature =
-            output.MethodDefSig(&types, &w::Type::Void, w::MethodCallAttributes::HASTHIS);
+            output.MethodDefSig(&types, &w::Type::Void, MethodCallAttributes::HASTHIS);
         let ctor = output.MemberRef(".ctor", signature, attribute_ref);
 
-        let fixed: Vec<w::Value> = args
+        let fixed: Vec<Value> = args
             .iter()
             .filter_map(|(name, value)| {
                 if name.is_empty() {
@@ -68,7 +70,7 @@ fn write_attributes<R: r::HasAttributes>(output: &mut w::File, parent: w::HasAtt
             })
             .collect();
 
-        let named: Vec<(&str, w::Value)> = args
+        let named: Vec<(&str, Value)> = args
             .iter()
             .filter_map(|(name, value)| {
                 if !name.is_empty() {
@@ -85,7 +87,7 @@ fn write_attributes<R: r::HasAttributes>(output: &mut w::File, parent: w::HasAtt
 }
 
 fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
-    let flags = w::TypeAttributes(def.flags().0);
+    let flags = TypeAttributes(def.flags().0);
 
     let extends = if let Some(extends) = def.extends() {
         w::TypeDefOrRef::TypeRef(output.TypeRef(extends.namespace(), extends.name()))
@@ -96,17 +98,17 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
     let type_def = output.TypeDef(def.namespace(), def.raw_name(), extends, flags);
 
     for field in def.fields() {
-        let flags = w::FieldAttributes(field.flags().0);
+        let flags = FieldAttributes(field.flags().0);
         let signature = output.FieldSig(&convert_type(&field.ty(None)));
 
         let parent = output.Field(field.name(), signature, flags);
 
         if let Some(constant) = field.constant() {
             let value = convert_value(&constant.value());
-            let ty = value.ty().code();
+            let ty = value.ty();
             let value = output.ConstantValue(&value);
 
-            output.Constant(w::HasConstant::Field(parent), ty, value);
+            output.Constant(w::HasConstant::Field(parent), ty as u8, value);
         }
     }
 
@@ -158,10 +160,10 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
             let signature_blob = output.MethodDefSig(
                 &types,
                 &convert_type(&signature.return_type),
-                w::MethodCallAttributes(signature.call_flags.0),
+                MethodCallAttributes(signature.call_flags.0),
             );
-            let flags = w::MethodAttributes(method.flags().0);
-            let impl_flags = w::MethodImplAttributes(method.impl_flags().0);
+            let flags = MethodAttributes(method.flags().0);
+            let impl_flags = MethodImplAttributes(method.impl_flags().0);
 
             let method_def = output.MethodDef(method.name(), signature_blob, flags, impl_flags);
 
@@ -169,7 +171,7 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
                 output.Param(
                     return_param.name(),
                     return_param.sequence(),
-                    w::ParamAttributes(return_param.flags().0),
+                    ParamAttributes(return_param.flags().0),
                 );
             }
 
@@ -177,7 +179,7 @@ fn write_def(output: &mut w::File, def: r::TypeDef, include_methods: bool) {
                 output.Param(
                     param.def.name(),
                     param.def.sequence(),
-                    w::ParamAttributes(param.def.flags().0),
+                    ParamAttributes(param.def.flags().0),
                 );
             }
 
@@ -237,21 +239,21 @@ fn convert_type(input: &r::Type) -> w::Type<'static> {
     }
 }
 
-fn convert_value(value: &r::Value) -> w::Value {
+fn convert_value(value: &r::Value) -> Value {
     match value {
-        r::Value::Bool(value) => w::Value::Bool(*value),
-        r::Value::U8(value) => w::Value::U8(*value),
-        r::Value::I8(value) => w::Value::I8(*value),
-        r::Value::U16(value) => w::Value::U16(*value),
-        r::Value::I16(value) => w::Value::I16(*value),
-        r::Value::U32(value) => w::Value::U32(*value),
-        r::Value::I32(value) => w::Value::I32(*value),
-        r::Value::U64(value) => w::Value::U64(*value),
-        r::Value::I64(value) => w::Value::I64(*value),
-        r::Value::F32(value) => w::Value::F32(*value),
-        r::Value::F64(value) => w::Value::F64(*value),
-        r::Value::Str(value) => w::Value::Str(value),
-        r::Value::TypeName(tn) => w::Value::TypeName(w::TypeName::new(tn.namespace(), tn.name())),
+        r::Value::Bool(value) => Value::Bool(*value),
+        r::Value::U8(value) => Value::U8(*value),
+        r::Value::I8(value) => Value::I8(*value),
+        r::Value::U16(value) => Value::U16(*value),
+        r::Value::I16(value) => Value::I16(*value),
+        r::Value::U32(value) => Value::U32(*value),
+        r::Value::I32(value) => Value::I32(*value),
+        r::Value::U64(value) => Value::U64(*value),
+        r::Value::I64(value) => Value::I64(*value),
+        r::Value::F32(value) => Value::F32(*value),
+        r::Value::F64(value) => Value::F64(*value),
+        r::Value::Str(value) => Value::Str(value),
+        r::Value::TypeName(tn) => Value::TypeName(tn),
         rest => panic!("{rest:?}"),
     }
 }

@@ -11,23 +11,23 @@ impl TypeDef<'_> {
         TypeAttributes(self.usize(0) as u32)
     }
 
-    pub fn type_name<'a>(&'a self) -> TypeName<'a> {
+    pub fn type_name(&self) -> TypeName {
         TypeName(self.namespace(), self.name())
     }
 
-    pub fn name<'a>(&'a self) -> &'a str {
+    pub fn name(&self) -> &str {
         trim_tick(self.str(1))
     }
 
-    pub fn raw_name<'a>(&'a self) -> &'a str {
+    pub fn raw_name(&self) -> &str {
         self.str(1)
     }
 
-    pub fn namespace<'a>(&'a self) -> &'a str {
+    pub fn namespace(&self) -> &str {
         self.str(2)
     }
 
-    pub fn extends(& self) -> Option<TypeDefOrRef> {
+    pub fn extends(&self) -> Option<TypeDefOrRef> {
         let extends = self.usize(3);
 
         if extends == 0 {

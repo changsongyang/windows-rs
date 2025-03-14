@@ -1,6 +1,6 @@
 use windows_bindgen as reader;
-use windows_ecma335::writer::*;
 use windows_bindgen::HasAttributes;
+use windows_ecma335::{*, writer::*};
 
 #[test]
 fn test() {
@@ -52,14 +52,12 @@ fn test() {
     );
 
     let guid_attribute =
-    MemberRefParent::TypeRef(file.TypeRef("Windows.Foundation.Metadata", "GuidAttribute"));
+        MemberRefParent::TypeRef(file.TypeRef("Windows.Foundation.Metadata", "GuidAttribute"));
 
     let guid_ctor = file.MemberRef(".ctor", guid_signature, guid_attribute);
 
-
-
-     let object_name = TypeDefOrRef::TypeRef(file.TypeRef("System", "Object"));
-     let interface_name = TypeDefOrRef::TypeRef(file.TypeRef("Namespace", "IName"));
+    let object_name = TypeDefOrRef::TypeRef(file.TypeRef("System", "Object"));
+    let interface_name = TypeDefOrRef::TypeRef(file.TypeRef("Namespace", "IName"));
 
     let class_def = file.TypeDef(
         "Namespace",
@@ -90,8 +88,8 @@ fn test() {
         guid_value,
     );
 
-     let bytes = file.into_stream();
-     std::fs::write("tests/class.winmd", bytes).unwrap();
+    let bytes = file.into_stream();
+    std::fs::write("tests/class.winmd", bytes).unwrap();
 
     let reader = reader::Reader::new(vec![reader::File::new(
         std::fs::read("tests/class.winmd").unwrap(),

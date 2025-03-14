@@ -17,7 +17,7 @@ impl PartialOrd for TypeName<'_> {
     }
 }
 
-impl<'a> TypeName<'a> {
+impl TypeName<'_> {
     pub const Object: Self = Self("System", "Object");
     pub const IsConst: Self = Self("System.Runtime.CompilerServices", "IsConst");
 
@@ -44,11 +44,11 @@ impl<'a> TypeName<'a> {
         Self(&full_name[0..index], &full_name[index + 1..])
     }
 
-    pub fn namespace(&'a self) -> &'a str {
+    pub fn namespace(&self) -> &str {
         self.0
     }
 
-    pub fn name(&'a self) -> &'a str {
+    pub fn name(&self) -> &str {
         self.1
     }
 }

@@ -100,4 +100,8 @@ impl TypeAttributes {
     pub const Interface: Self = Self(0x20);
     pub const SequentialLayout: Self = Self(0x8);
     pub const Import: Self = Self(0x1000);
+
+    pub fn is_nested(&self) -> bool {
+        (self.0 & 0x00000006) != 0
+    }
 }

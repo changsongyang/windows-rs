@@ -314,6 +314,7 @@ impl Class {
 
             for (_, arg) in attribute.args() {
                 if let Value::TypeName(tn) = arg {
+                    let tn = TypeName::parse(tn);
                     let Type::Interface(mut interface) = self
                         .def
                         .reader()

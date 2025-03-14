@@ -42,6 +42,10 @@ impl PartialOrd for File {
 unsafe impl Sync for File {}
 
 impl File {
+    pub fn read<P: AsRef<std::path::Path>>(path: P) -> Option<Self> {
+        std::fs::read(path).ok().and_then(Self::new)
+    }
+
     pub fn new(bytes: Vec<u8>) -> Option<Self> {
         let mut result = File {
             bytes,

@@ -15,7 +15,7 @@ pub enum Value {
     F64(f64),
     Str(&'static str),
     String(String),
-    TypeName(TypeName),
+    TypeName(&'static str),
 }
 
 impl Value {

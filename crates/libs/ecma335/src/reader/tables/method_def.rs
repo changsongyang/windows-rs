@@ -6,7 +6,7 @@ impl std::fmt::Debug for MethodDef<'_> {
     }
 }
 
-impl<'a> MethodDef<'a> {
+impl MethodDef<'_> {
     pub fn impl_flags(&self) -> MethodImplAttributes {
         MethodImplAttributes(self.usize(1) as u16)
     }
@@ -15,7 +15,7 @@ impl<'a> MethodDef<'a> {
         MethodAttributes(self.usize(2) as u16)
     }
 
-    pub fn name(&'a self) -> &'a str {
+    pub fn name(&self) -> &str {
         self.str(3)
     }
 
@@ -34,7 +34,7 @@ impl<'a> MethodDef<'a> {
         self.list(5)
     }
 
-    pub fn parent(&'a self) -> MemberRefParent<'a> {
+    pub fn parent(&self) -> MemberRefParent {
         MemberRefParent::TypeDef(self.file().parent(5, *self))
     }
 

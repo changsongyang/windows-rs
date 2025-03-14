@@ -43,7 +43,7 @@ code! { AttributeType(3)
 }
 
 impl AttributeType<'_> {
-    pub fn parent<'a>(&'a self) -> MemberRefParent<'a> {
+    pub fn parent(&self) -> MemberRefParent {
         match self {
             Self::MethodDef(row) => row.parent(),
             Self::MemberRef(row) => row.parent(),
@@ -84,21 +84,21 @@ code! { MemberRefParent(3)
 }
 
 impl MemberRefParent<'_> {
-    pub fn type_name<'a>(&'a self) -> TypeName<'a> {
+    pub fn type_name(&self) -> TypeName {
         match self {
             Self::TypeDef(row) => row.type_name(),
             Self::TypeRef(row) => row.type_name(),
         }
     }
 
-    pub fn namespace<'a>(&'a self) -> &'a str {
+    pub fn namespace(&self) -> &str {
         match self {
             Self::TypeDef(row) => row.namespace(),
             Self::TypeRef(row) => row.namespace(),
         }
     }
 
-    pub fn name<'a>(&'a self) -> &'a str {
+    pub fn name(&self) -> &str {
         match self {
             Self::TypeDef(row) => row.name(),
             Self::TypeRef(row) => row.name(),
@@ -116,8 +116,8 @@ code! { TypeOrMethodDef(1)
     (TypeDef, 0)
 }
 
-impl<'a> TypeDefOrRef<'a> {
-    pub fn type_name(&'a self) -> TypeName<'a> {
+impl TypeDefOrRef<'_> {
+    pub fn type_name(&self) -> TypeName {
         match self {
             Self::TypeDef(row) => row.type_name(),
             Self::TypeRef(row) => row.type_name(),

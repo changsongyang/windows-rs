@@ -7,15 +7,15 @@ impl std::fmt::Debug for TypeRef<'_> {
 }
 
 impl TypeRef<'_> {
-    pub fn type_name<'a>(&'a self) -> TypeName<'a> {
+    pub fn type_name(&self) -> TypeName {
         TypeName(self.namespace(), self.name())
     }
 
-    pub fn name<'a>(&'a self) -> &'a str {
+    pub fn name(&self) -> &str {
         trim_tick(self.str(1))
     }
 
-    pub fn namespace<'a>(&'a self) -> &'a str {
+    pub fn namespace(&self) -> &str {
         self.str(2)
     }
 }
