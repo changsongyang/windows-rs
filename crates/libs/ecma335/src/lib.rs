@@ -1,26 +1,7 @@
 #![doc = include_str!("../readme.md")]
 #![allow(non_snake_case, non_upper_case_globals, dead_code)]
 
-mod attributes;
-mod bindings;
-mod blobs;
-mod codes;
-mod file;
-mod helpers;
-mod strings;
-mod tables;
-mod ty;
-mod value;
+pub mod reader;
+pub mod writer;
 
-use bindings::*;
-use blobs::*;
-use helpers::*;
-use std::collections::*;
-use strings::*;
-use tables::*;
-
-pub use attributes::*;
-pub use codes::*;
-pub use file::*;
-pub use ty::*;
-pub use value::*;
+// TODO: maybe ecma335 shares the File struct only and bindgen build its own Reader/Type cache and ecma335 can have its own Reader/Type cache

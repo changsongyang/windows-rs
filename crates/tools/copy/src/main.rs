@@ -1,5 +1,5 @@
 use windows_bindgen as r;
-use windows_ecma335 as w;
+use windows_ecma335::writer as w;
 
 fn main() {
     let time = std::time::Instant::now();
