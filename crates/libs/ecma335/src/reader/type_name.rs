@@ -1,9 +1,9 @@
 use super::*;
 
 #[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
-pub struct TypeName(pub &'static str, pub &'static str);
+pub struct TypeName<'a>(pub &'a str, pub &'a str);
 
-impl Ord for TypeName {
+impl Ord for TypeName<'_> {
     fn cmp(&self, other: &Self) -> Ordering {
         // Type names are sorted before namespaces. The `Type` sort order depends on this.
         // This is more efficient in general as many types typically share a namespace.
@@ -11,13 +11,13 @@ impl Ord for TypeName {
     }
 }
 
-impl PartialOrd for TypeName {
+impl PartialOrd for TypeName<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl TypeName {
+impl<'a> TypeName<'a> {
     pub const Object: Self = Self("System", "Object");
     pub const IsConst: Self = Self("System.Runtime.CompilerServices", "IsConst");
 
@@ -44,16 +44,16 @@ impl TypeName {
         Self(&full_name[0..index], &full_name[index + 1..])
     }
 
-    pub fn namespace(&self) -> &'static str {
+    pub fn namespace(&'a self) -> &'a str {
         self.0
     }
 
-    pub fn name(&self) -> &'static str {
+    pub fn name(&'a self) -> &'a str {
         self.1
     }
 }
 
-impl std::fmt::Display for TypeName {
+impl std::fmt::Display for TypeName<'_> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(fmt, "{}.{}", self.0, self.1)
     }

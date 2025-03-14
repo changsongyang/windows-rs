@@ -1,5 +1,3 @@
-use super::*;
-
 #[derive(Debug)]
 pub enum Value {
     Bool(bool),
@@ -15,5 +13,4 @@ pub enum Value {
     F64(f64),
     Str(&'static str),
     String(String),
-    TypeName(TypeName),
 }

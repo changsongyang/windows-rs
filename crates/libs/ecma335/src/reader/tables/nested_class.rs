@@ -1,6 +1,6 @@
 use super::*;
 
-impl std::fmt::Debug for NestedClass {
+impl std::fmt::Debug for NestedClass<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("NestedClass")
             .field("inner", &self.inner())
@@ -9,7 +9,7 @@ impl std::fmt::Debug for NestedClass {
     }
 }
 
-impl NestedClass {
+impl NestedClass<'_> {
     pub fn inner(&self) -> TypeDef {
         TypeDef(self.row(0))
     }

@@ -1,12 +1,12 @@
 use super::*;
 
-impl std::fmt::Debug for MethodParam {
+impl std::fmt::Debug for MethodParam<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("MethodParam").field(&self.name()).finish()
     }
 }
 
-impl MethodParam {
+impl MethodParam<'_> {
     pub fn flags(&self) -> ParamAttributes {
         ParamAttributes(self.usize(0) as u16)
     }
@@ -15,7 +15,7 @@ impl MethodParam {
         self.usize(1) as u16
     }
 
-    pub fn name(&self) -> &'static str {
+    pub fn name(&self) -> &str {
         self.str(2)
     }
 }

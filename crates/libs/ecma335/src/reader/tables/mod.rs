@@ -20,13 +20,13 @@ macro_rules! tables {
     ($(($name:ident, $table:literal))+) => {
         $(
         #[derive(Copy, Clone, Hash, PartialEq, Eq, Ord, PartialOrd)]
-        pub struct $name(pub Row);
-        impl AsRow for $name {
+        pub struct $name<'a>(pub Row<'a>);
+        impl<'a> AsRow<'a> for $name<'a> {
             const TABLE: usize = $table;
-            fn to_row(&self) -> Row {
+            fn to_row(&self) -> Row<'a> {
                 self.0
             }
-            fn from_row(row: Row) -> Self {
+            fn from_row(row: Row<'a>) -> Self {
                 $name(row)
             }
         }

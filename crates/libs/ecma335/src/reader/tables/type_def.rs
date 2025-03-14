@@ -1,40 +1,40 @@
 use super::*;
 
-impl std::fmt::Debug for TypeDef {
+impl std::fmt::Debug for TypeDef<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "TypeDef({})", self.type_name())
     }
 }
 
-impl TypeDef {
+impl TypeDef<'_> {
     pub fn flags(&self) -> TypeAttributes {
         TypeAttributes(self.usize(0) as u32)
     }
 
-    pub fn type_name(&self) -> TypeName {
+    pub fn type_name<'a>(&'a self) -> TypeName<'a> {
         TypeName(self.namespace(), self.name())
     }
 
-    pub fn name(&self) -> &'static str {
+    pub fn name<'a>(&'a self) -> &'a str {
         trim_tick(self.str(1))
     }
 
-    pub fn raw_name(&self) -> &'static str {
+    pub fn raw_name<'a>(&'a self) -> &'a str {
         self.str(1)
     }
 
-    pub fn namespace(&self) -> &'static str {
+    pub fn namespace<'a>(&'a self) -> &'a str {
         self.str(2)
     }
 
-    pub fn extends(&self) -> Option<TypeName> {
+    pub fn extends(& self) -> Option<TypeDefOrRef> {
         let extends = self.usize(3);
 
         if extends == 0 {
             return None;
         }
 
-        Some(TypeDefOrRef::decode(self.file(), extends).type_name())
+        Some(TypeDefOrRef::decode(self.file(), extends))
     }
 
     pub fn methods(&self) -> RowIterator<MethodDef> {

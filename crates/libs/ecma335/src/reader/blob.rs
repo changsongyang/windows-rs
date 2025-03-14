@@ -1,17 +1,17 @@
 use super::*;
 
-pub struct Blob {
-    file: &'static File,
-    slice: &'static [u8],
+pub struct Blob<'a> {
+    file: &'a File,
+    slice: &'a [u8],
 }
 
-impl std::fmt::Debug for Blob {
+impl std::fmt::Debug for Blob<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.slice)
     }
 }
 
-impl std::ops::Deref for Blob {
+impl std::ops::Deref for Blob<'_> {
     type Target = [u8];
 
     fn deref(&self) -> &[u8] {
@@ -19,8 +19,8 @@ impl std::ops::Deref for Blob {
     }
 }
 
-impl Blob {
-    pub fn new(file: &'static File, slice: &'static [u8]) -> Self {
+impl<'a> Blob<'a> {
+    pub fn new(file: &'a File, slice: &'a [u8]) -> Self {
         Self { file, slice }
     }
 
@@ -40,7 +40,7 @@ impl Blob {
         }
     }
 
-    pub fn decode<D: Decode>(&mut self) -> D {
+    pub fn decode<D: Decode<'a>>(&mut self) -> D {
         D::decode(self.file, self.read_usize())
     }
 
@@ -75,7 +75,7 @@ impl Blob {
         value
     }
 
-    pub fn read_str(&mut self) -> &'static str {
+    pub fn read_str(&mut self) -> &str {
         let len = self.read_usize();
         let value = unsafe { std::str::from_utf8_unchecked(&self.slice[..len]) };
         self.offset(len);

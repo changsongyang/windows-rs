@@ -1,66 +1,66 @@
 use super::*;
 
 #[derive(Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
-pub struct Row {
-    file: *const File,
+pub struct Row<'a> {
+    file: &'a File,
     index: usize,
 }
 
-unsafe impl Send for Row {}
-unsafe impl Sync for Row {}
+unsafe impl Send for Row<'_> {}
+unsafe impl Sync for Row<'_> {}
 
-impl Row {
-    pub(crate) fn new(file: &'static File, index: usize) -> Self {
+impl<'a> Row<'a> {
+    pub(crate) fn new(file: &'a File, index: usize) -> Self {
         Self { file, index }
     }
 }
 
-pub trait AsRow: Copy {
+pub trait AsRow<'a>: Copy {
     const TABLE: usize;
-    fn to_row(&self) -> Row;
-    fn from_row(row: Row) -> Self;
+    fn to_row(&self) -> Row<'a>;
+    fn from_row(row: Row<'a>) -> Self;
 
-    fn file(&self) -> &'static File {
-        unsafe { &*self.to_row().file }
+    fn file(&'a self) -> &'a File {
+        self.to_row().file
     }
 
     fn index(&self) -> usize {
         self.to_row().index
     }
 
-    fn usize(&self, column: usize) -> usize {
+    fn usize(&'a self, column: usize) -> usize {
         self.file().usize(self.index(), Self::TABLE, column)
     }
 
-    fn str(&self, column: usize) -> &'static str {
+    fn str(&'a self, column: usize) -> &'a str {
         self.file().str(self.index(), Self::TABLE, column)
     }
 
-    fn row(&self, column: usize) -> Row {
+    fn row(&'a self, column: usize) -> Row<'a> {
         Row::new(self.file(), self.usize(column) - 1)
     }
 
-    fn decode<T: Decode>(&self, column: usize) -> T {
+    fn decode<T: Decode<'a>>(&'a self, column: usize) -> T {
         T::decode(self.file(), self.usize(column))
     }
 
-    fn blob(&self, column: usize) -> Blob {
+    fn blob(&'a self, column: usize) -> Blob<'a> {
         self.file().blob(self.index(), Self::TABLE, column)
     }
 
-    fn list<R: AsRow>(&self, column: usize) -> RowIterator<R> {
+    fn list<R: AsRow<'a>>(&'a self, column: usize) -> RowIterator<'a, R> {
         self.file().list(self.index(), Self::TABLE, column)
     }
 }
 
-pub struct RowIterator<R: AsRow> {
-    file: &'static File,
+pub struct RowIterator<'a, R: AsRow<'a>> {
+    file: &'a File,
     rows: std::ops::Range<usize>,
     phantom: std::marker::PhantomData<R>,
 }
 
-impl<R: AsRow> RowIterator<R> {
-    pub(crate) fn new(file: &'static File, rows: std::ops::Range<usize>) -> Self {
+impl<'a, R: AsRow<'a>> RowIterator<'a, R> {
+    pub(crate) fn new(file: &'a File, rows: std::ops::Range<usize>) -> Self {
         Self {
             file,
             rows,
@@ -69,7 +69,7 @@ impl<R: AsRow> RowIterator<R> {
     }
 }
 
-impl<R: AsRow> Iterator for RowIterator<R> {
+impl<'a, R: AsRow<'a>> Iterator for RowIterator<'a, R> {
     type Item = R;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -79,23 +79,23 @@ impl<R: AsRow> Iterator for RowIterator<R> {
     }
 }
 
-pub trait HasAttributes {
-    fn attributes(&self) -> RowIterator<Attribute>;
-    fn find_attribute(&self, name: &str) -> Option<Attribute>;
-    fn has_attribute(&self, name: &str) -> bool;
+pub trait HasAttributes<'a> {
+    fn attributes(&'a self) -> RowIterator<'a, Attribute<'a>>;
+    fn find_attribute(&'a self, name: &str) -> Option<Attribute<'a>>;
+    fn has_attribute(&'a self, name: &str) -> bool;
 }
 
-impl<R: AsRow + Into<HasAttribute>> HasAttributes for R {
-    fn attributes(&self) -> RowIterator<Attribute> {
+impl<'a, R: AsRow<'a> + Into<HasAttribute<'a>>> HasAttributes<'a> for R {
+    fn attributes(&'a self) -> RowIterator<'a, Attribute<'a>> {
         self.file()
             .equal_range(0, Into::<HasAttribute>::into(*self).encode())
     }
 
-    fn find_attribute(&self, name: &str) -> Option<Attribute> {
-        self.attributes().find(|attribute| attribute.name() == name)
+    fn find_attribute(&'a self, name: &str) -> Option<Attribute<'a>> {
+        self.attributes().find(|attribute| attribute.ty().parent().name() == name)
     }
 
-    fn has_attribute(&self, name: &str) -> bool {
+    fn has_attribute(&'a self, name: &str) -> bool {
         self.find_attribute(name).is_some()
     }
 }
